@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.remote-wsl",
+
+    "a-h.templ",
+    "aaron-bond.better-comments",
+    "CucumberOpen.cucumber-official",
+    "esbenp.prettier-vscode",
+    "github.vscode-github-actions",
+    "golang.go",
+    "Gruntfuggly.todo-tree",
+    "ms-azuretools.vscode-docker",
+    "redhat.vscode-yaml",
+    "streetsidesoftware.code-spell-checker",
+    "tamasfe.even-better-toml",
+    "task.vscode-task",
+    "thejltres.fomantic-ui-snippets"
+  ]
+}

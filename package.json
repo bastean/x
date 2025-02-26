@@ -1,0 +1,131 @@
+{
+  "private": true,
+  "name": "codexgo",
+  "version": "4.14.2",
+  "description": "codexGO",
+  "author": "Bastean <bastean@pm.me>",
+  "license": "MIT",
+  "homepage": "https://github.com/bastean/codexgo#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bastean/codexgo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bastean/codexgo/issues"
+  },
+  "workspaces": [
+    "internal/app/*"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "19.7.1",
+    "@commitlint/config-conventional": "19.7.1",
+    "@release-it/bumper": "7.0.1",
+    "@release-it/conventional-changelog": "10.0.0",
+    "husky": "9.1.7",
+    "lint-staged": "15.4.3",
+    "npm-check-updates": "17.1.14",
+    "prettier": "3.5.1",
+    "release-it": "18.1.2"
+  },
+  "overrides": {
+    "conventional-changelog-conventionalcommits": "8.0.0"
+  },
+  "lint-staged": {
+    "**/*": [
+      "trufflehog filesystem --no-update",
+      "prettier --no-config --ignore-unknown --write"
+    ],
+    "**/*.go": [
+      "gofmt -l -s -w"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "release-it": {
+    "git": {
+      "requireBranch": "main",
+      "commitMessage": "chore(release): v${version}",
+      "tagAnnotation": "codexgo ${version}",
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}"
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "infile": "CHANGELOG.md",
+        "header": "# Changelog",
+        "preset": {
+          "name": "conventionalcommits",
+          "types": [
+            {
+              "type": "build",
+              "section": "Builds"
+            },
+            {
+              "type": "chore",
+              "section": "Chores"
+            },
+            {
+              "type": "ci",
+              "section": "Continuous Integration"
+            },
+            {
+              "type": "docs",
+              "section": "Documentation"
+            },
+            {
+              "type": "feat",
+              "section": "New Features"
+            },
+            {
+              "type": "fix",
+              "section": "Bug Fixes"
+            },
+            {
+              "type": "perf",
+              "section": "Performance Improvements"
+            },
+            {
+              "type": "refactor",
+              "section": "Refactors"
+            },
+            {
+              "type": "revert",
+              "section": "Reverts"
+            },
+            {
+              "type": "style",
+              "section": "Styles"
+            },
+            {
+              "type": "test",
+              "section": "Tests"
+            }
+          ]
+        }
+      },
+      "@release-it/bumper": {
+        "out": [
+          "internal/**/package.json",
+          "internal/**/manifest.json"
+        ]
+      }
+    },
+    "hooks": {
+      "before:init": [
+        "task lint-check",
+        "task test-unit"
+      ],
+      "before:release": [
+        "task lint",
+        "git add . --update"
+      ],
+      "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}"
+    }
+  }
+}

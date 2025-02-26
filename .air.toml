@@ -1,0 +1,65 @@
+root = "."
+tmp_dir = "tmp"
+testdata_dir = "testdata"
+
+[build]
+  pre_cmd = ["task generate-required"]
+  cmd = "go build -buildvcs=false -o ./tmp/main ./cmd/codexgo"
+  post_cmd = []
+  bin = "./tmp/main"
+  full_bin = ""
+  args_bin = []
+  include_ext = [
+    "go",
+    "html",
+    "templ",
+    "tmpl",
+    "tpl"
+  ]
+  exclude_dir = []
+  include_dir = [
+    "cmd",
+    "internal",
+    "pkg"
+  ]
+  include_file = []
+  exclude_file = []
+  exclude_regex = [
+    "^.*_test\\.go$",
+    "^.*\\.mother\\.go$",
+    "^.*\\.mock\\.go$",
+    "^.*_templ\\.go$"
+  ]
+  exclude_unchanged = true
+  follow_symlink = true
+  log = "air.log"
+  poll = false
+  poll_interval = 1000
+  delay = 1000
+  stop_on_error = false
+  send_interrupt = true
+  kill_delay = 1000
+  rerun = false
+  rerun_delay = 1000
+
+[log]
+  time = true
+  main_only = false
+
+[color]
+  main = "magenta"
+  watcher = "cyan"
+  build = "yellow"
+  runner = "green"
+
+[misc]
+  clean_on_exit = true
+
+[screen]
+  clear_on_rebuild = true
+  keep_scroll = true
+
+[proxy]
+  enabled = true
+  proxy_port = 8090
+  app_port = 8080

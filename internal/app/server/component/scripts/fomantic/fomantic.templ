@@ -1,0 +1,36 @@
+package fomantic
+
+script Init() {
+    let user = {
+        "user_create" : "/v4/account",
+        "user_login"  : "/v4/account",
+        "user_update" : "/v4/account",
+        "user_delete" : "/v4/account",
+        "user_forgot" : "/v4/account/forgot",
+        "user_reset"  : "/v4/account/reset",
+    };
+
+    $.api.settings.api = {
+        ...user,
+    };
+    
+    $.api.settings.serializeForm = true;
+
+    $.api.settings.contentType = "application/json; charset=UTF-8";
+
+    $.api.settings.beforeSend = function(settings) {
+        settings.data = JSON.stringify(settings.data);
+        return settings;
+    };
+
+    $.api.settings.successTest = function(response) {
+        if(response && response.Success) {
+            return response.Success;
+        }
+
+        return false;
+    };
+}
+
+templ Fomantic() {
+}
