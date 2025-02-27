@@ -3,8 +3,8 @@ tmp_dir = "tmp"
 testdata_dir = "testdata"
 
 [build]
-  pre_cmd = ["task generate-required"]
-  cmd = "go build -buildvcs=false -o ./tmp/main ./cmd/codexgo"
+  pre_cmd = [""]
+  cmd = ""
   post_cmd = []
   bin = "./tmp/main"
   full_bin = ""

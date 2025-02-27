@@ -9,12 +9,12 @@ runs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version-file: "go.mod"
-        cache-dependency-path: "go.sum"
+        go-version-file: "go.work"
+        cache-dependency-path: "**/*.sum"
 
     - name: Setup Task
       uses: arduino/setup-task@v2
 
-    - name: Setup codexGO
+    - name: Setup X
       shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
       run: task init-ci

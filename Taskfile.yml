@@ -5,18 +5,15 @@ includes:
     taskfile: ./configs/upgrade
     optional: true
     flatten: true
-  desktop:
-    taskfile: ./configs/desktop
-    optional: true
-    flatten: true
 
 vars:
   #* URL
-  URL_SERVER: http://localhost:8080
-  URL_GITHUB: https://github.com/bastean/codexgo
+  URL_GITHUB: https://github.com/bastean/x
 
   #* Go
-  GO_MODULE: github.com/bastean/codexgo/v4
+  GO_WORK: github.com/bastean/x
+  GO_MODULES:
+    sh: find -name "go.mod" -type f -exec bash -c "dirname {} | xargs basename" ";"
 
   #* Prompt
   PROMPT_WARNING: This is a dangerous command... Do you want to continue?
@@ -58,6 +55,23 @@ tasks:
       vars: ["OLD", "NEW", "FILE"]
     cmd: sed -i -E 's/{{.OLD}}/{{.NEW}}/g' {{.FILE}}
 
+  go-modules-config: &go-modules-config
+    internal: true
+    requires:
+      vars: ["MODULE"]
+    dir: "{{.MODULE}}"
+
+  go-modules:
+    requires:
+      vars: ["TASK"]
+    vars:
+      LIST: "{{.GO_MODULES}}"
+    cmds:
+      - for: { var: LIST, as: MODULE }
+        task: "{{.TASK}}"
+        vars:
+          MODULE: "{{.MODULE}}"
+
   bun-ci:
     internal: true
     cmd: bun i --frozen-lockfile
@@ -74,25 +88,6 @@ tasks:
     internal: true
     cmd: bunx release-it -V -d --no-git.requireCleanWorkingDir {{.OPTIONS}}
 
-  compose-env:
-    internal: true
-    requires:
-      vars: ["OPTIONS"]
-    dir: deployments
-    cmd: docker compose --env-file {{.OPTIONS}}
-
-  docker-rm-vol:
-    internal: true
-    requires:
-      vars: ["VOLUME"]
-    cmd: docker volume rm -f {{.VOLUME}}
-
-  docker-rm-img:
-    internal: true
-    requires:
-      vars: ["IMAGE"]
-    cmd: docker rmi -f {{.IMAGE}}
-
   git-reset-hard:
     internal: true
     cmd: git reset --hard HEAD
@@ -108,18 +103,21 @@ tasks:
           URL: https://bun.sh/install
           PIPE: sudo BUN_INSTALL=/usr/local bash
 
-  upgrade-go: go get -t -u ./cmd/... ./internal/... ./pkg/... ./scripts/...
+  upgrade-go:
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: upgrade-go-modules
+      - go work sync
 
-  copydeps: go run ./scripts/copydeps
+  upgrade-go-modules:
+    <<: *go-modules-config
+    cmd: go get -t -u ./...
 
   upgrade-bun:
     cmds:
       - task: ncu
-      - task: ncu
-        vars:
-          FILTERS: fomantic-ui -t @nightly
       - bun i
-      - task: copydeps
 
   upgrade-reset:
     cmds:
@@ -154,7 +152,6 @@ tasks:
       - task: install-linters
       - task: install-debuggers
       - go install github.com/air-verse/air@latest
-      - go install github.com/a-h/templ/cmd/templ@latest
 
   install-tools-test:
     cmds:
@@ -162,7 +159,6 @@ tasks:
         vars:
           URL: https://raw.githubusercontent.com/axllent/mailpit/develop/install.sh
           PIPE: sudo bash
-      - go run github.com/playwright-community/playwright-go/cmd/playwright@latest install chromium --with-deps
 
   install-tooling:
     cmds:
@@ -176,15 +172,7 @@ tasks:
   #* Download
   download-dependencies:
     cmds:
-      - go mod download
       - task: bun-ci
-
-  #* Generate
-  generate-required:
-    cmds:
-      - go generate ./...
-      - find . -name "*_templ.go" -type f -delete
-      - templ generate
 
   #* Restore
   restore:
@@ -198,8 +186,6 @@ tasks:
       - task: upgrade-managers
       - task: install-tooling
       - task: download-dependencies
-      - task: copydeps
-      - task: generate-required
       - task: restore
 
   init-ci:
@@ -207,7 +193,6 @@ tasks:
       - task: upgrade-managers
       - task: install-tooling-ci
       - task: download-dependencies
-      - task: generate-required
       - task: restore
 
   genesis:
@@ -215,15 +200,6 @@ tasks:
       - git init
       - git add .
       - task: init
-
-  #* ENV
-  syncenv-reset:
-    cmds:
-      - task: git-reset-hard
-
-  syncenv:
-    dir: deployments
-    cmd: go run ../scripts/syncenv
 
   #* Scan
   scan-leaks-local:
@@ -267,87 +243,86 @@ tasks:
   #* Lint/Format
   lint:
     cmds:
-      - go mod tidy
-      - goimports -l -w -local {{.GO_MODULE}} .
-      - gofmt -l -s -w .
+      - task: go-modules
+        vars:
+          TASK: lint-modules
       - bunx prettier --no-config --ignore-unknown --write .
-      - templ fmt .
-      - task: generate-required
+
+  lint-modules:
+    <<: *go-modules-config
+    cmds:
+      - go mod tidy
+      - goimports -l -w -local {{.GO_WORK}}/{{.MODULE}} .
+      - gofmt -l -s -w .
 
   lint-check:
     cmds:
-      - staticcheck ./...
+      - task: go-modules
+        vars:
+          TASK: lint-check-modules
       - bunx prettier --check .
 
+  lint-check-modules:
+    <<: *go-modules-config
+    cmd: staticcheck ./...
+
   #* Debug
-  debug-dead: deadcode -test ./...
+  debug-dead:
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: debug-dead-modules
+
+  debug-dead-modules:
+    <<: *go-modules-config
+    cmd: deadcode -test ./...
 
   debugs:
     cmds:
       - task: debug-dead
 
   #* Test
-  test-sut: air
-
   test-clean:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
-      - task: generate-required
       - go clean -testcache
       - mkdir -p test/report
 
-  test-codegen: bunx playwright codegen {{.URL_SERVER}}
-
-  test-sync:
-    requires:
-      vars: ["TEST_SYNC"]
-    cmd: bunx concurrently -s first -k --names 'SUT,TEST' 'task test-sut' 'bunx wait-on -l {{.URL_SERVER}}/health && {{.TEST_SYNC}}'
-
   test-unit:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - task: bash
-        vars:
-          CMD: go test -v -cover ./pkg/context/... -run TestUnit.* |& tee test/report/unit.report.log
+      - go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
   test-integration:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - task: bash
-        vars:
-          CMD: go test -v -cover ./pkg/context/... -run TestIntegration.* |& tee test/report/integration.report.log
-
-  test-acceptance-sync:
-    cmds:
-      - task: bash
-        vars:
-          CMD: SUT_URL="{{.URL_SERVER}}" go test -v -cover ./internal/app/... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+      - go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
   test-acceptance:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - task: test-sync
-        vars:
-          TEST_SYNC: task test-acceptance-sync
-
-  tests-sync:
-    cmds:
-      - task: bash
-        vars:
-          CMD: SUT_URL="{{.URL_SERVER}}" go test -v -cover ./... |& tee test/report/report.log
+      - go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
   tests:
+    dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - task: test-sync
-        vars:
-          TEST_SYNC: task tests-sync
+      - go test -v -cover ./... |& tee test/report/report.log
 
   #* Build
-  build:
+  build-*:
+    dir: "{{.USER_WORKING_DIR}}"
+    requires:
+      vars: ["BINARY"]
+    vars:
+      BINARY: "{{index .MATCH 0}}"
     cmds:
       - task: lint
       - rm -rf build/
-      - go build -ldflags="-s -w" -o build/codexgo ./cmd/codexgo
+      - go build -ldflags="-s -w" -o build/{{.BINARY}} ./cmd/{{.BINARY}}
 
   #* Release
   release:
@@ -408,155 +383,6 @@ tasks:
 
   #* Mailpit
   mailpit: mailpit --smtp-auth-allow-insecure --smtp-auth-accept-any
-
-  #* Docker
-  docker-usage: docker system df
-
-  docker-it-*:
-    requires:
-      vars: ["ID"]
-    vars:
-      ID: "{{index .MATCH 0}}"
-    cmd: docker exec -it {{.ID}} bash
-
-  compose-up-*:
-    requires:
-      vars: ["ENV", "SERVICE"]
-    vars:
-      SERVICE: "{{index .MATCH 0}}"
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: "{{.ENV}} up {{.SERVICE}}"
-
-  compose-down-*:
-    requires:
-      vars: ["ENV", "SERVICE"]
-    vars:
-      SERVICE: "{{index .MATCH 0}}"
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: "{{.ENV}} down {{.SERVICE}}"
-
-  compose-dev-down:
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.dev --profile dev down
-      - task: docker-rm-vol
-        vars:
-          VOLUME: codexgo-database-mongodb-dev
-
-  compose-dev:
-    cmds:
-      - task: compose-dev-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.dev --profile dev up
-
-  compose-test-down:
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.test --profile test down
-      - task: docker-rm-vol
-        vars:
-          VOLUME: codexgo-database-mongodb-test
-
-  compose-test-integration:
-    cmds:
-      - task: compose-test-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.test --env-file .env.demo.test.integration --profile test up --exit-code-from codexgo
-
-  compose-test-acceptance:
-    cmds:
-      - task: compose-test-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.test --env-file .env.demo.test.acceptance --profile test up --exit-code-from codexgo
-
-  compose-tests:
-    cmds:
-      - task: compose-test-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.test --profile test up --exit-code-from codexgo
-
-  compose-prod-down:
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.prod down
-      - task: docker-rm-img
-        vars:
-          IMAGE: codexgo
-
-  compose-prod:
-    cmds:
-      - task: compose-prod-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo.prod up --exit-code-from codexgo
-
-  demo-down:
-    cmds:
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo --profile demo down
-
-  demo:
-    cmds:
-      - task: demo-down
-      - task: compose-env
-        vars:
-          OPTIONS: .env.demo --profile demo up --exit-code-from codexgo
-
-  compose-down:
-    cmds:
-      - task: compose-dev-down
-      - task: compose-test-down
-      - task: compose-prod-down
-      - task: demo-down
-
-  WARNING-docker-prune-soft:
-    prompt: "{{.PROMPT_WARNING}}"
-    cmds:
-      - docker system prune
-      - task: compose-down
-      - task: docker-usage
-
-  WARNING-docker-prune-hard:
-    prompt: "{{.PROMPT_WARNING}}"
-    cmds:
-      - docker system prune --volumes -a
-      - task: compose-down
-      - task: docker-usage
-
-  #* Devcontainer
-  devcontainer-*-*:
-    requires:
-      vars: ["USER", "PASSWORD"]
-    vars:
-      USER: "{{index .MATCH 0}}"
-      PASSWORD: "{{index .MATCH 1}}"
-    cmds:
-      - task: bash
-        vars:
-          CMD: echo -e "{{.PASSWORD}}\n{{.PASSWORD}}" | sudo passwd {{.USER}}
-      - task: init
-
-  connect-*-*-*:
-    requires:
-      vars: ["PORT", "USER", "HOST"]
-    vars:
-      PORT: "{{index .MATCH 0}}"
-      USER: "{{index .MATCH 1}}"
-      HOST: "{{index .MATCH 2}}"
-    cmds:
-      - ssh -p {{.PORT}} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null {{.USER}}@{{.HOST}}
 
   #* Fix
   fix-dev:
