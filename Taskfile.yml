@@ -283,15 +283,23 @@ tasks:
 
   #* Test
   test-clean:
-    dir: "{{.USER_WORKING_DIR}}"
+    dir: "{{if .DIR}}{{.DIR}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
     cmds:
       - go clean -testcache
       - mkdir -p test/report
 
   test-unit:
-    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: test-unit-modules
+
+  test-unit-modules:
+    <<: *go-modules-config
     cmds:
       - task: test-clean
+        vars:
+          DIR: "{{.MODULE}}"
       - go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
   test-integration:
