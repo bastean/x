@@ -252,6 +252,7 @@ tasks:
     <<: *go-modules-config
     cmds:
       - go mod tidy
+      - go mod verify
       - goimports -l -w -local {{.GO_WORK}}/{{.MODULE}} .
       - gofmt -l -s -w .
 
@@ -327,6 +328,8 @@ tasks:
       vars: ["BINARY"]
     vars:
       BINARY: "{{index .MATCH 0}}"
+    env:
+      GOWORK: off
     cmds:
       - task: lint
       - rm -rf build/
