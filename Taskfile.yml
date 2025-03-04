@@ -358,7 +358,7 @@ tasks:
     cmds:
       - task: release-it
         vars:
-          OPTIONS: --ci --no-git.requireCleanWorkingDir {{.OPTIONS}}
+          OPTIONS: --ci --no-git.requireCleanWorkingDir -i minor {{.OPTIONS}}
 
   release-dry:
     cmds:
