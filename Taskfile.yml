@@ -119,6 +119,16 @@ tasks:
       - task: ncu
       - bun i
 
+  upgrade-workflow:
+    vars:
+      MODULES: '{{splitList "\n" .GO_MODULES | join ", "}}'
+    cmds:
+      - task: replace
+        vars:
+          OLD: options:\s\[.*\]
+          NEW: 'options: \[{{.MODULES}}\]'
+          FILE: ./.github/workflows/module.yml
+
   upgrade-reset:
     cmds:
       - task: git-reset-hard
@@ -359,6 +369,12 @@ tasks:
       - task: release-it
         vars:
           OPTIONS: --ci --no-git.requireCleanWorkingDir -i minor {{.OPTIONS}}
+
+  release-module:
+    requires:
+      vars: ["OPTIONS"]
+    cmds:
+      - go run ./tools/cmd/release {{.OPTIONS}}
 
   release-dry:
     cmds:
