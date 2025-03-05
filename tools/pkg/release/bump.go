@@ -30,7 +30,7 @@ func BumpVersion(module *Module, latest string) (string, error) {
 	minor, errMinor := strconv.Atoi(semver[1])
 	patch, errPatch := strconv.Atoi(semver[2])
 
-	if err := errors.Join(errPatch, errMinor, errMajor); err != nil {
+	if err := errors.Join(errMajor, errMinor, errPatch); err != nil {
 		return "", err
 	}
 

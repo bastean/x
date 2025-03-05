@@ -55,7 +55,7 @@ func (s *BumpTestSuite) TestBumpVersionRelease() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
-	module := release.RandomModuleFirstRelease()
+	module := release.RandomModuleRelease()
 
 	latest := module.Name
 

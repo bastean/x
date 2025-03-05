@@ -18,7 +18,7 @@ func RandomTag(module *Module) (string, string, int, int, int) {
 	minor, errMinor := strconv.Atoi(semver[1])
 	patch, errPatch := strconv.Atoi(semver[2])
 
-	if err := errors.Join(errPatch, errMinor, errMajor); err != nil {
+	if err := errors.Join(errMajor, errMinor, errPatch); err != nil {
 		panic(err)
 	}
 

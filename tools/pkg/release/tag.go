@@ -1,7 +1,6 @@
 package release
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -19,12 +18,12 @@ func (t *Tag) Latest(module *Module) (string, error) {
 
 	switch {
 	case err != nil:
-		return "", errors.New(string(output))
+		return "", err
 	case len(output) == 0:
 		return "", fmt.Errorf("no previous release found for %q", module.Name)
 	}
 
-	return strings.TrimRight(string(output), "\n"), nil
+	return strings.TrimRight(output, "\n"), nil
 }
 
 func (t *Tag) Create(annotate, message string) error {
