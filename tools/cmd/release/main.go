@@ -1,14 +1,12 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
-	"slices"
-	"strconv"
 	"strings"
+
+	"github.com/bastean/x/tools/pkg/release"
 )
 
 const (
@@ -17,140 +15,90 @@ const (
 
 var (
 	err            error
-	message        string
+	name           string
 	increment      string
-	module         string
 	isFirstRelease bool
-)
-
-var (
-	increments = []string{
-		"patch",
-		"minor",
-	}
 )
 
 func usage() {
 	fmt.Printf("Usage: %s [flags]\n\n", cli)
-
 	flag.PrintDefaults()
 }
 
-func fatal(where, what string) {
-	fmt.Printf("Error(%s): %s.\n", where, what)
+func fatal(what string) {
+	what = strings.TrimRight(what, "\n")
+
+	fmt.Printf("Error: %s\n", what)
+
 	os.Exit(1)
 }
 
-func latestTag(module string) (string, error) {
-	output, err := exec.Command("bash", "-c", fmt.Sprintf("git tag --sort=-taggerdate | grep %s | head -n 1", module)).Output()
-
-	switch {
-	case err != nil:
-		return "", err
-	case len(output) == 0:
-		return "", fmt.Errorf("no previous release found for %q", module)
-	}
-
-	return strings.TrimRight(string(output), "\n"), nil
-}
-
-func bump(latest, increment string) (string, error) {
-	actualVersion := strings.Split(latest, "v")[1]
-
-	semver := strings.Split(actualVersion, ".")
-
-	if len(semver) != 3 {
-		return "", fmt.Errorf("%q does not follow the semver convention", actualVersion)
-	}
-
-	patch, errPatch := strconv.Atoi(semver[2])
-	minor, errMinor := strconv.Atoi(semver[1])
-	major, errMajor := strconv.Atoi(semver[0])
-
-	if err = errors.Join(errPatch, errMinor, errMajor); err != nil {
-		return "", err
-	}
-
-	switch increment {
-	case "patch":
-		patch++
-	case "minor":
-		minor++
-	}
-
-	return fmt.Sprintf("%d.%d.%d", major, minor, patch), nil
-}
-
-func commit(module, version string) error {
-	if err := exec.Command("git", "commit", "--allow-empty", "-m", fmt.Sprintf("chore(release): %s/v%s", module, version)).Run(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func tag(version, module string) error {
-	if err := exec.Command("git", "tag", "-a", fmt.Sprintf("%s/v%s", module, version), "-m", fmt.Sprintf("%s %s", module, version)).Run(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func main() {
-	flag.StringVar(&increment, "i", "", "Increment \"patch\" or \"minor\" (required)")
+	flag.StringVar(&name, "m", "", "Module name (required)")
 
-	flag.StringVar(&module, "m", "", "Module name (required)")
+	flag.StringVar(&increment, "i", "", "Increment \"patch\", \"minor\" or \"major\" (optional: if \"-f\" is used)")
 
-	flag.BoolVar(&isFirstRelease, "f", false, "Is the first release (default: false)")
+	flag.BoolVar(&isFirstRelease, "f", false, "First Release (default: false)")
 
 	flag.Usage = usage
 
 	flag.Parse()
 
-	switch {
-	case flag.NFlag() == 0:
+	if flag.NFlag() == 0 {
 		flag.Usage()
+
 		println()
-		message = "define required flags"
-	case !slices.Contains(increments, increment):
-		message = fmt.Sprintf("%q is not valid, allowed values are \"patch\" or \"minor\"", increment)
-	case strings.TrimSpace(module) == "":
-		message = "module name is required"
+
+		fatal("define required flags")
 	}
 
-	if message != "" {
-		fatal("flags", message)
-		return
+	var module *release.Module
+
+	switch {
+	case isFirstRelease:
+		module, err = release.NewModuleFirstRelease(name)
+	default:
+		module, err = release.NewModuleRelease(name, increment)
 	}
-
-	version := "0.1.0"
-
-	if !isFirstRelease {
-		latest, err := latestTag(module)
-
-		if err != nil {
-			fatal("latestTag", err.Error())
-		}
-
-		version, err = bump(latest, increment)
-
-		if err != nil {
-			fatal("bump", err.Error())
-		}
-	}
-
-	err = commit(module, version)
 
 	if err != nil {
-		fatal("commit", err.Error())
+		fatal(err.Error())
 	}
 
-	err = tag(version, module)
+	exec := new(release.Exec)
+
+	tag := &release.Tag{
+		Doer: exec,
+	}
+
+	latest, err := tag.Latest(module)
 
 	if err != nil {
-		fatal("tag", err.Error())
+		fatal(err.Error())
 	}
 
-	fmt.Printf("Successfully released \"%s %s\"\n", module, version)
+	version, err := release.BumpVersion(module, latest)
+
+	if err != nil {
+		fatal(err.Error())
+	}
+
+	commit := &release.Commit{
+		Doer: exec,
+	}
+
+	err = commit.CreateStd(module, version)
+
+	if err != nil {
+		fatal(err.Error())
+	}
+
+	err = tag.CreateStd(module, version)
+
+	if err != nil {
+		commit.Reset()
+		fatal(err.Error())
+	}
+
+	fmt.Printf("Successfully released \"%s %s\"\n", module.Name, version)
 }

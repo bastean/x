@@ -3,8 +3,9 @@ package example_test
 import (
 	"testing"
 
-	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services"
 
 	"github.com/bastean/x/example"
 )
