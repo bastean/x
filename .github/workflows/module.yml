@@ -7,7 +7,7 @@ on:
         type: choice
         description: Module
         required: true
-        options: [tools, example]
+        options: [tools]
 
       bump:
         type: choice
