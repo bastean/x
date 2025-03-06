@@ -72,6 +72,8 @@ tasks:
         vars:
           MODULE: "{{.MODULE}}"
 
+  work-sync: go work sync
+
   bun-ci:
     internal: true
     cmd: bun i --frozen-lockfile
@@ -108,7 +110,7 @@ tasks:
       - task: go-modules
         vars:
           TASK: upgrade-go-modules
-      - go work sync
+      - task: work-sync
 
   upgrade-go-modules:
     <<: *go-modules-config
@@ -391,6 +393,27 @@ tasks:
       - task: release-it-dry
         vars:
           OPTIONS: --changelog
+
+  #* Go
+  work-use-*:
+    requires:
+      vars: ["MODULE"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+    cmds:
+      - go work use {{.MODULE}} && task upgrade-workflow
+      - task: work-sync
+
+  work-drop-*:
+    prompt: "{{.PROMPT_WARNING}}"
+    requires:
+      vars: ["MODULE"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+    cmds:
+      - go work edit -dropuse {{.MODULE}}
+      - rm -rf {{.MODULE}} && task upgrade-workflow
+      - task: work-sync
 
   #* Git
   commit: bunx czg
