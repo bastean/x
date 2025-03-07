@@ -11,7 +11,6 @@
 <div align="center">
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bastean/x)](https://goreportcard.com/report/github.com/bastean/x)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://github.com/commitizen/cz-cli)
 [![Release It!](https://img.shields.io/badge/%F0%9F%93%A6%F0%9F%9A%80-release--it-orange.svg)](https://github.com/release-it/release-it)
 
@@ -27,10 +26,35 @@
 
 <div align="center">
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bastean/x.svg)](https://pkg.go.dev/github.com/bastean/x)
 [![GitHub Releases](https://img.shields.io/github/v/release/bastean/x.svg)](https://github.com/bastean/x/releases)
 
 </div>
+
+## Modules
+
+| Module         | Reference                                                                                                                 | Status                                                                                                                                     | Latest                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| [tools](tools) | [![Go Reference](https://pkg.go.dev/badge/github.com/bastean/x/tools.svg)](https://pkg.go.dev/github.com/bastean/x/tools) | [![Go Report Card](https://goreportcard.com/badge/github.com/bastean/x/tools)](https://goreportcard.com/report/github.com/bastean/x/tools) | ![Version](https://img.shields.io/github/v/tag/bastean/x?filter=tools%2Fv*&label=release) |
+
+### Workflow
+
+> [!IMPORTANT]
+> To add or remove a module within [go.work](go.work), we must use the following tasks to synchronize the workflow of [module.yml](.github/workflows/module.yml) with the new changes in the workspace.
+
+Add new module to workspace
+
+```bash
+task work-use-"<module>"
+```
+
+Remove module from workspace
+
+> [!WARNING]
+> This task will also delete the specified module folder.
+
+```bash
+task work-drop-"<module>"
+```
 
 ## First Steps
 
@@ -62,6 +86,62 @@ git clone git@github.com:bastean/x.git && cd x
    ```bash
    task init
    ```
+
+### Run
+
+#### Tests
+
+##### Unit (Single-Module)
+
+```bash
+cd <module> && task test-unit
+```
+
+##### Unit (Multi-Module)
+
+```bash
+task test-units
+```
+
+##### Integration (Single-Module)
+
+```bash
+cd <module> && task test-integration
+```
+
+##### Integration (Multi-Module)
+
+```bash
+task test-integrations
+```
+
+##### Acceptance (Single-Module)
+
+```bash
+cd <module> && task test-acceptance
+```
+
+##### Acceptance (Multi-Module)
+
+```bash
+task test-acceptances
+```
+
+##### Unit / Integration / Acceptance (Multi-Module)
+
+```bash
+task tests
+```
+
+## Tech Stack
+
+#### Base
+
+- [Go](https://go.dev)
+
+#### Please see
+
+- [package.json](package.json)
 
 ## Contributing
 
