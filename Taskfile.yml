@@ -28,7 +28,11 @@ tasks:
       - echo -e "{{.CONFIG}}" >> ~/.bashrc
       - . ~/.bashrc
 
+  dir-config: &dir-config
+    dir: "{{if .DIR}}{{.DIR}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
+
   bash:
+    <<: *dir-config
     internal: true
     requires:
       vars: ["CMD"]
@@ -296,12 +300,20 @@ tasks:
 
   #* Test
   test-clean:
-    dir: "{{if .DIR}}{{.DIR}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
+    <<: *dir-config
     cmds:
       - go clean -testcache
       - mkdir -p test/report
 
   test-unit:
+    dir: "{{.USER_WORKING_DIR}}"
+    cmds:
+      - task: test-clean
+      - task: bash
+        vars:
+          CMD: go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+
+  test-units:
     cmds:
       - task: go-modules
         vars:
@@ -313,25 +325,77 @@ tasks:
       - task: test-clean
         vars:
           DIR: "{{.MODULE}}"
-      - go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+      - task: bash
+        vars:
+          DIR: "{{.MODULE}}"
+          CMD: go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
   test-integration:
     dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+      - task: bash
+        vars:
+          CMD: go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+
+  test-integrations:
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: test-integration-modules
+
+  test-integration-modules:
+    <<: *go-modules-config
+    cmds:
+      - task: test-clean
+        vars:
+          DIR: "{{.MODULE}}"
+      - task: bash
+        vars:
+          DIR: "{{.MODULE}}"
+          CMD: go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
   test-acceptance:
     dir: "{{.USER_WORKING_DIR}}"
     cmds:
       - task: test-clean
-      - go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+      - task: bash
+        vars:
+          CMD: go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
-  tests:
-    dir: "{{.USER_WORKING_DIR}}"
+  test-acceptances:
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: test-acceptance-modules
+
+  test-acceptance-modules:
+    <<: *go-modules-config
     cmds:
       - task: test-clean
-      - go test -v -cover ./... |& tee test/report/report.log
+        vars:
+          DIR: "{{.MODULE}}"
+      - task: bash
+        vars:
+          DIR: "{{.MODULE}}"
+          CMD: go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+
+  tests:
+    cmds:
+      - task: go-modules
+        vars:
+          TASK: tests-modules
+
+  tests-modules:
+    <<: *go-modules-config
+    cmds:
+      - task: test-clean
+        vars:
+          DIR: "{{.MODULE}}"
+      - task: bash
+        vars:
+          DIR: "{{.MODULE}}"
+          CMD: go test -v -cover ./... |& tee test/report/report.log
 
   #* Build
   build-*:
