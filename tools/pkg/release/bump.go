@@ -14,7 +14,7 @@ var (
 )
 
 func BumpVersion(module *Module, latest string) (string, error) {
-	version := strings.Split(latest, "v")
+	version := strings.Split(latest, "/v")
 
 	if len(version) != 2 {
 		return "", ErrBumpInvalidVersion
