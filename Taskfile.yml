@@ -127,7 +127,7 @@ tasks:
 
   upgrade-workflow:
     vars:
-      MODULES: '{{splitList "\n" .GO_MODULES | join ", "}}'
+      MODULES: '{{splitLines .GO_MODULES | join ", "}}'
     cmds:
       - task: replace
         vars:

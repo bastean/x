@@ -114,7 +114,7 @@
     "hooks": {
       "before:init": [
         "task lint-check",
-        "task test-unit"
+        "task test-units"
       ],
       "before:release": [
         "task lint",

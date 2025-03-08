@@ -13,6 +13,7 @@
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://github.com/commitizen/cz-cli)
 [![Release It!](https://img.shields.io/badge/%F0%9F%93%A6%F0%9F%9A%80-release--it-orange.svg)](https://github.com/release-it/release-it)
+[![GitHub Releases](https://img.shields.io/github/v/release/bastean/x.svg)](https://github.com/bastean/x/releases)
 
 </div>
 
@@ -21,12 +22,6 @@
 [![Upgrade workflow](https://github.com/bastean/x/actions/workflows/upgrade.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/upgrade.yml)
 [![CI workflow](https://github.com/bastean/x/actions/workflows/ci.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/ci.yml)
 [![Release workflow](https://github.com/bastean/x/actions/workflows/release.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/release.yml)
-
-</div>
-
-<div align="center">
-
-[![GitHub Releases](https://img.shields.io/github/v/release/bastean/x.svg)](https://github.com/bastean/x/releases)
 
 </div>
 
