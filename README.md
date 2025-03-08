@@ -25,13 +25,15 @@
 
 </div>
 
-## Modules
+<div align="center">
 
 | Module         | Reference                                                                                                                 | Status                                                                                                                                     | Latest                                                                                    |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | [tools](tools) | [![Go Reference](https://pkg.go.dev/badge/github.com/bastean/x/tools.svg)](https://pkg.go.dev/github.com/bastean/x/tools) | [![Go Report Card](https://goreportcard.com/badge/github.com/bastean/x/tools)](https://goreportcard.com/report/github.com/bastean/x/tools) | ![Version](https://img.shields.io/github/v/tag/bastean/x?filter=tools%2Fv*&label=release) |
 
-### Workflow
+</div>
+
+## Workflow
 
 > [!IMPORTANT]
 > To add or remove a module within [go.work](go.work), we must use the following tasks to synchronize the workflow of [module.yml](.github/workflows/module.yml) with the new changes in the workspace.
