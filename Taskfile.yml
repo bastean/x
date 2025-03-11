@@ -311,7 +311,7 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+          CMD: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
   test-units:
     cmds:
@@ -328,7 +328,7 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+          CMD: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
   test-integration:
     dir: "{{.USER_WORKING_DIR}}"
@@ -336,7 +336,7 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+          CMD: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
   test-integrations:
     cmds:
@@ -353,7 +353,7 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+          CMD: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
   test-acceptance:
     dir: "{{.USER_WORKING_DIR}}"
@@ -361,7 +361,7 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+          CMD: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
   test-acceptances:
     cmds:
@@ -378,7 +378,7 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+          CMD: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
   tests:
     cmds:
@@ -395,7 +395,7 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -v -cover ./... |& tee test/report/report.log
+          CMD: go test -count=1 -race -v -cover ./... |& tee test/report/report.log
 
   #* Build
   build-*:
