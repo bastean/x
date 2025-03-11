@@ -17,7 +17,7 @@ type TagTestSuite struct {
 	doer *release.DoerMock
 }
 
-func (s *TagTestSuite) SetupTest() {
+func (s *TagTestSuite) SetupSuite() {
 	s.doer = new(release.DoerMock)
 
 	s.SUT = &release.Tag{

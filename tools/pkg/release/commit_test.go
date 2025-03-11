@@ -17,7 +17,7 @@ type CommitTestSuite struct {
 	doer *release.DoerMock
 }
 
-func (s *CommitTestSuite) SetupTest() {
+func (s *CommitTestSuite) SetupSuite() {
 	s.doer = new(release.DoerMock)
 
 	s.SUT = &release.Commit{
