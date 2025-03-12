@@ -53,6 +53,44 @@ Remove module from workspace
 task work-drop-"<module>"
 ```
 
+#### ...`v0` > `<module>/dev0.1.0` > `ci/<module>/dev0.1.0` > `main` > `v0`...
+
+Create `v0` branch from `main`.
+
+```bash
+task git-v0
+```
+
+Create module development branch `<module>/dev0.1.0` from `main`.
+
+```bash
+task git-"<module>"-dev0.1.0
+```
+
+Create branch `ci/<module>/dev0.1.0` from `<module>/dev0.1.0` to ensure that the workflows run correctly with the new changes before merging them with `main`.
+
+```bash
+task git-ci/"<module>"/dev0.1.0
+```
+
+Once the workflows have been successfully passed, the new changes from `ci/<module>/dev0.1.0` will be merged into `main`.
+
+```bash
+task git-main-ci/"<module>"/dev0.1.0
+```
+
+After releasing the new version `<module>/v0.1.0`, the `main` and `v0` branches in our local repository will be updated.
+
+```bash
+task git-pull-v0
+```
+
+To end the cycle, the `<module>/dev0.1.0` and `ci/<module>/dev0.1.0` branches will be deleted.
+
+```bash
+task git-cleanup-"<module>"/dev0.1.0
+```
+
 ## First Steps
 
 ### Clone
