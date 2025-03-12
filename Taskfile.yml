@@ -198,6 +198,8 @@ tasks:
   #* Download
   download-dependencies:
     cmds:
+      - go mod download
+      - task: work-sync
       - task: bun-ci
 
   #* Restore
