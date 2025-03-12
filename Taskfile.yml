@@ -504,6 +504,93 @@ tasks:
   #* Git
   commit: bunx czg
 
+  git-update-*:
+    requires:
+      vars: ["REPOSITORY"]
+    vars:
+      REPOSITORY: "{{index .MATCH 0}}"
+    cmds:
+      - 'git commit -m "chore: update codexgo to {{.REPOSITORY}}"'
+      - task: upgrade
+      - git push
+      - git status
+
+  git-v*:
+    requires:
+      vars: ["VERSION"]
+    vars:
+      VERSION: "{{index .MATCH 0}}"
+    cmds:
+      - git checkout main
+      - git pull --rebase
+      - git checkout -b v{{.VERSION}}
+      - git push -u github v{{.VERSION}}
+      - git status
+
+  git-*-dev*:
+    requires:
+      vars: ["MODULE", "VERSION"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      VERSION: "{{index .MATCH 1}}"
+    cmds:
+      - git checkout main
+      - git pull --rebase
+      - git checkout -b {{.MODULE}}/dev{{.VERSION}}
+      - git push -u github {{.MODULE}}/dev{{.VERSION}}
+      - git status
+
+  git-ci/*/dev*:
+    requires:
+      vars: ["MODULE", "VERSION"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      VERSION: "{{index .MATCH 1}}"
+    cmds:
+      - git checkout {{.MODULE}}/dev{{.VERSION}}
+      - git pull --rebase
+      - git checkout -b ci/{{.MODULE}}/dev{{.VERSION}}
+      - git push -u github ci/{{.MODULE}}/dev{{.VERSION}}
+      - git status
+
+  git-main-ci/*/dev*:
+    requires:
+      vars: ["MODULE", "VERSION"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      VERSION: "{{index .MATCH 1}}"
+    cmds:
+      - git checkout main
+      - git pull --rebase
+      - git merge ci/{{.MODULE}}/dev{{.VERSION}}
+      - git push
+      - git status
+
+  git-pull-v*:
+    requires:
+      vars: ["VERSION"]
+    vars:
+      VERSION: "{{index .MATCH 0}}"
+    cmds:
+      - git checkout main
+      - git pull --rebase
+      - git checkout v{{.VERSION}}
+      - git merge main
+      - git push
+      - git status
+
+  git-cleanup-*/dev*:
+    requires:
+      vars: ["MODULE", "VERSION"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      VERSION: "{{index .MATCH 1}}"
+    cmds:
+      - git branch -d {{.MODULE}}/dev{{.VERSION}} ci/{{.MODULE}}/dev{{.VERSION}}
+      - git push -u github :{{.MODULE}}/dev{{.VERSION}} :ci/{{.MODULE}}/dev{{.VERSION}}
+      - git branch -a
+      - git status
+
   WARNING-git-forget:
     prompt: "{{.PROMPT_WARNING}}"
     cmds:
