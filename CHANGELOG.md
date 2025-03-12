@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0](https://github.com/bastean/x/compare/v0.2.0...v0.3.0) (2025-03-12)
+
+### Chores
+
+- **deps:** upgrade ([d7caad8](https://github.com/bastean/x/commit/d7caad8c4be5629d728c79588e8737afef61e79d))
+- **release:** tools/v0.2.1 ([9232ba2](https://github.com/bastean/x/commit/9232ba2f9de7192843cbaecbf539b8503b4e508b))
+- **task:** add module workflow with git branches ([93ae3bb](https://github.com/bastean/x/commit/93ae3bb36f00c837b6c77ba1186d7b9d62e593cd))
+
+### Continuous Integration
+
+- add scans for vulnerabilities and misconfigurations ([d407869](https://github.com/bastean/x/commit/d40786922d5eac8bcef3c3a84f1e252fc40a9aae))
+
+### Documentation
+
+- **readme:** add workflow with git branches ([a108006](https://github.com/bastean/x/commit/a1080060943ab35a18404f5859a618f469e83947))
+
+### Styles
+
+- **tools:** rename file main to release ([a9c9912](https://github.com/bastean/x/commit/a9c991200adf92f3acf7e9f3b43260788f60c6c6))
+
+### Tests
+
+- reuse setup across all test cases in the suite ([fd82f44](https://github.com/bastean/x/commit/fd82f44f1220650e16663998db8c9a386f1a0da9))
+- use data race detector ([8b12128](https://github.com/bastean/x/commit/8b1212893f646c95443ff3924bca74521e619fe3))
+
 ## [0.2.0](https://github.com/bastean/x/compare/v0.1.0...v0.2.0) (2025-03-08)
 
 ### Chores
