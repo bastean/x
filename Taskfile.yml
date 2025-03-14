@@ -59,6 +59,13 @@ tasks:
       vars: ["OLD", "NEW", "FILE"]
     cmd: sed -i -E 's/{{.OLD}}/{{.NEW}}/g' {{.FILE}}
 
+  go-install:
+    requires:
+      vars: ["PACKAGES"]
+    cmds:
+      - for: { var: PACKAGES, as: PACKAGE }
+        cmd: go install {{.PACKAGE}}
+
   go-modules-config: &go-modules-config
     internal: true
     requires:
@@ -153,7 +160,9 @@ tasks:
   #* Install
   install-scanners:
     cmds:
-      - go install github.com/google/osv-scanner/cmd/osv-scanner@latest
+      - task: go-install
+        vars:
+          PACKAGES: github.com/google/osv-scanner/cmd/osv-scanner@latest
       - task: curl
         vars:
           URL: https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh
@@ -165,19 +174,30 @@ tasks:
 
   install-linters:
     cmds:
-      - go install golang.org/x/tools/cmd/goimports@latest
-      - go install honnef.co/go/tools/cmd/staticcheck@latest
+      - task: go-install
+        vars:
+          PACKAGES:
+            - golang.org/x/tools/cmd/goimports@latest
+            - golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
+            - honnef.co/go/tools/cmd/staticcheck@latest
+            - github.com/kisielk/errcheck@latest
+            - github.com/gordonklaus/ineffassign@latest
+            - github.com/fzipp/gocyclo/cmd/gocyclo@latest
 
   install-debuggers:
     cmds:
-      - go install golang.org/x/tools/cmd/deadcode@latest
+      - task: go-install
+        vars:
+          PACKAGES: golang.org/x/tools/cmd/deadcode@latest
 
   install-tools-dev:
     cmds:
       - task: install-scanners
       - task: install-linters
       - task: install-debuggers
-      - go install github.com/air-verse/air@latest
+      - task: go-install
+        vars:
+          PACKAGES: github.com/air-verse/air@latest
 
   install-tools-test:
     cmds:
@@ -305,7 +325,13 @@ tasks:
 
   lint-check-modules:
     <<: *go-modules-config
-    cmd: staticcheck ./...
+    cmds:
+      - go vet ./...
+      - go vet -vettool=$(which shadow) ./...
+      - staticcheck ./...
+      - errcheck ./...
+      - ineffassign ./...
+      - gocyclo -over 15 .
 
   #* Debug
   debug-dead:
