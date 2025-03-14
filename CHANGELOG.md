@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/bastean/x/compare/v0.3.0...v0.4.0) (2025-03-14)
+
+### Chores
+
+- **release:** tools/v0.2.2 ([346f39b](https://github.com/bastean/x/commit/346f39b1635f3e3062bc8c92e6557ebcaf000a90))
+- **task:** add go dependencies download ([bff3086](https://github.com/bastean/x/commit/bff308676c456155f2a5ad96aeba7a2498e8ac74))
+- **task:** add vet, shadow, errcheck, ineffassign and gocyclo ([5385123](https://github.com/bastean/x/commit/5385123c39240ee40cfce6de1e4084133af56fab))
+- **vscode:** add extensions and settings ([fc1a177](https://github.com/bastean/x/commit/fc1a1771b538766e113a5d526ef9f38b36032c9a))
+
+### Continuous Integration
+
+- **github:** add upload of test reports ([f8769b9](https://github.com/bastean/x/commit/f8769b99999427a29967dd840d017519b8f2fa84))
+
+### Bug Fixes
+
+- **tools:** handle unchecked errors ([af929f6](https://github.com/bastean/x/commit/af929f64afef71ae84341b4f948a0c5f02b64be4))
+
 ## [0.3.0](https://github.com/bastean/x/compare/v0.2.0...v0.3.0) (2025-03-12)
 
 ### Chores
