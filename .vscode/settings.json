@@ -1,0 +1,13 @@
+{
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "cSpell.language": "en,lorem",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "go.toolsManagement.autoUpdate": true,
+  "gopls": {
+    "ui.semanticTokens": true
+  }
+}
