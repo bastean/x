@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/bastean/x/tools/pkg/release"
 )
@@ -26,10 +25,7 @@ func usage() {
 }
 
 func fatal(what string) {
-	what = strings.TrimRight(what, "\n")
-
 	fmt.Printf("Error: %s\n", what)
-
 	os.Exit(1)
 }
 
@@ -96,7 +92,10 @@ func main() {
 	err = tag.CreateStd(module, version)
 
 	if err != nil {
-		commit.Reset()
+		if errReset := commit.Reset(); errReset != nil {
+			fatal(fmt.Sprintf("\n\n%s\n%s", errReset.Error(), err.Error()))
+		}
+
 		fatal(err.Error())
 	}
 
