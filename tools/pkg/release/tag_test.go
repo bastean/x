@@ -48,7 +48,7 @@ func (s *TagTestSuite) TestCreate() {
 
 	_, version, _, _, _ := release.RandomTag(module)
 
-	annotate := fmt.Sprintf("v%s", version)
+	annotate := "v" + version
 
 	message := services.Create.Message()
 

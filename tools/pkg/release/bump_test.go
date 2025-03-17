@@ -17,7 +17,7 @@ type BumpTestSuite struct {
 func (s *BumpTestSuite) TestBumpVersionFirstRelease() {
 	module := release.RandomModuleFirstRelease()
 
-	latest := fmt.Sprintf("%s/v0.0.0", module.Name)
+	latest := module.Name + "/v0.0.0"
 
 	expected := "0.1.0"
 
@@ -71,7 +71,7 @@ func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
 func (s *BumpTestSuite) TestBumpVersionErrInvalidSemVer() {
 	module := release.RandomModuleRelease()
 
-	latest := fmt.Sprintf("%s/v0", module.Name)
+	latest := module.Name + "/v0"
 
 	_, actual := release.BumpVersion(module, latest)
 

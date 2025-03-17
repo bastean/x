@@ -11,7 +11,7 @@ type Tag struct {
 
 func (t *Tag) Latest(module *Module) (string, error) {
 	if module.IsFirstRelease {
-		return fmt.Sprintf("%s/v0.0.0", module.Name), nil
+		return module.Name + "/v0.0.0", nil
 	}
 
 	output, err := t.Do("bash", "-c", fmt.Sprintf("git tag --sort -v:refname | grep %s | head -n 1", module.Name))

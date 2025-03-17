@@ -1,7 +1,6 @@
 package release_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -42,7 +41,7 @@ func (s *CommitTestSuite) TestCreateStd() {
 
 	latest, version, _, _, _ := release.RandomTag(module)
 
-	message := fmt.Sprintf("chore(release): %s", latest)
+	message := "chore(release): " + latest
 
 	cmds := []string{"git", "commit", "--allow-empty", "-m", message}
 
