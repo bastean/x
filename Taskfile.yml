@@ -60,6 +60,7 @@ tasks:
     cmd: sed -i -E 's/{{.OLD}}/{{.NEW}}/g' {{.FILE}}
 
   go-install:
+    internal: true
     requires:
       vars: ["PACKAGES"]
     cmds:
@@ -73,6 +74,7 @@ tasks:
     dir: "{{.MODULE}}"
 
   go-modules:
+    internal: true
     requires:
       vars: ["TASK"]
     vars:
@@ -83,11 +85,21 @@ tasks:
         vars:
           MODULE: "{{.MODULE}}"
 
-  work-sync: go work sync
+  work-sync:
+    internal: true
+    cmd: go work sync
 
   bun-ci:
     internal: true
     cmd: bun i --frozen-lockfile
+
+  prettier-*:
+    internal: true
+    requires:
+      vars: ["ACTION"]
+    vars:
+      ACTION: "{{index .MATCH 0}}"
+    cmd: bunx prettier --no-config --ignore-unknown --{{.ACTION}} .
 
   ncu:
     internal: true
@@ -102,11 +114,13 @@ tasks:
     cmd: bunx release-it -V -d --no-git.requireCleanWorkingDir {{.OPTIONS}}
 
   trufflehog-git:
+    internal: true
     requires:
       vars: ["URI"]
     cmd: sudo trufflehog git {{.URI}} --only-verified
 
   trivy-repo:
+    internal: true
     requires:
       vars: ["SCANNERS"]
     cmd: trivy repo --skip-dirs vendor --skip-dirs node_modules --skip-dirs dist --exit-code 1 --scanners {{.SCANNERS}}
@@ -174,15 +188,14 @@ tasks:
 
   install-linters:
     cmds:
+      - task: curl
+        vars:
+          URL: https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh
+          PIPE: sudo sh -s -- -b /usr/local/bin
       - task: go-install
         vars:
           PACKAGES:
             - golang.org/x/tools/cmd/goimports@latest
-            - golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
-            - honnef.co/go/tools/cmd/staticcheck@latest
-            - github.com/kisielk/errcheck@latest
-            - github.com/gordonklaus/ineffassign@latest
-            - github.com/fzipp/gocyclo/cmd/gocyclo@latest
 
   install-debuggers:
     cmds:
@@ -306,32 +319,25 @@ tasks:
       - task: go-modules
         vars:
           TASK: lint-modules
-      - bunx prettier --no-config --ignore-unknown --write .
+      - task: prettier-write
 
   lint-modules:
     <<: *go-modules-config
     cmds:
       - go mod tidy
       - go mod verify
-      - goimports -l -w -local {{.GO_WORK}}/{{.MODULE}} .
-      - gofmt -l -s -w .
+      - golangci-lint run --fix
 
   lint-check:
     cmds:
       - task: go-modules
         vars:
           TASK: lint-check-modules
-      - bunx prettier --check .
+      - task: prettier-check
 
   lint-check-modules:
     <<: *go-modules-config
-    cmds:
-      - go vet ./...
-      - go vet -vettool=$(which shadow) ./...
-      - staticcheck ./...
-      - errcheck ./...
-      - ineffassign ./...
-      - gocyclo -over 15 .
+    cmd: golangci-lint run
 
   #* Debug
   debug-dead:

@@ -1,0 +1,41 @@
+linters:
+  enable:
+    - errcheck
+    - gocyclo
+    - gosec
+    - ineffassign
+    - prealloc
+    - unused
+    #! AutoFix
+    - gocritic
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - perfsprint
+    - staticcheck
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  #! AutoFix
+  gocritic:
+    disabled-checks:
+      - commentFormatting
+  goimports:
+    local-prefixes: github.com/bastean/x
+  govet:
+    enable:
+      - shadow
+
+issues:
+  exclude-dirs:
+    - dist
+    - ignore
+    - node_modules
+    - temp
+    - tmp
+
+run:
+  timeout: 0s
+  relative-path-mode: gomod
