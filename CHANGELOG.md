@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/bastean/x/compare/v0.4.0...v0.5.0) (2025-03-18)
+
+### Chores
+
+- add golangci-lint ([debbc2b](https://github.com/bastean/x/commit/debbc2bc93d0828814bdd5b683dc04c8c33e1197))
+- **deps:** upgrade ([e2d6172](https://github.com/bastean/x/commit/e2d6172017dafd2464825aa9712b0d059de2109f))
+- **release:** tools/v0.2.3 ([79b4100](https://github.com/bastean/x/commit/79b4100c08bb17952007cf28fcbf9d11a8d73c9c))
+
+### New Features
+
+- **ci:** make gpg signing optional ([5f0d7d8](https://github.com/bastean/x/commit/5f0d7d8b1f3eec301882de70257ef101466e2d7f))
+
+### Bug Fixes
+
+- **golangci-lint:** resolve detected issues ([5d8e335](https://github.com/bastean/x/commit/5d8e335ac91f6437d4a6cb521a6ec9107dfca284))
+
 ## [0.4.0](https://github.com/bastean/x/compare/v0.3.0...v0.4.0) (2025-03-14)
 
 ### Chores
