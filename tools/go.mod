@@ -3,7 +3,7 @@ module github.com/bastean/x/tools
 go 1.24
 
 require (
-	github.com/bastean/codexgo/v4 v4.15.0
+	github.com/bastean/codexgo/v4 v4.15.2
 	github.com/stretchr/testify v1.10.0
 )
 
