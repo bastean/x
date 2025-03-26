@@ -51,7 +51,7 @@
     },
     "github": {
       "release": true,
-      "releaseName": "v${version}"
+      "releaseName": "Summary"
     },
     "plugins": {
       "@release-it/conventional-changelog": {
