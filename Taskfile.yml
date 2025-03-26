@@ -164,7 +164,7 @@ tasks:
         vars:
           OLD: options:\s\[.*\]
           NEW: 'options: \[{{.MODULES}}\]'
-          FILE: ./.github/workflows/module.yml
+          FILE: ./.github/workflows/release.yml
 
   upgrade-reset:
     cmds:

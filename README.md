@@ -21,6 +21,7 @@
 
 [![Upgrade workflow](https://github.com/bastean/x/actions/workflows/upgrade.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/upgrade.yml)
 [![CI workflow](https://github.com/bastean/x/actions/workflows/ci.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/ci.yml)
+[![Release workflow](https://github.com/bastean/x/actions/workflows/release.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/release.yml)
 [![Summary workflow](https://github.com/bastean/x/actions/workflows/summary.yml/badge.svg)](https://github.com/bastean/x/actions/workflows/summary.yml)
 
 </div>
@@ -36,7 +37,7 @@
 ## Workflow
 
 > [!IMPORTANT]
-> To add or remove a module within [go.work](go.work), we must use the following tasks to synchronize the workflow of [module.yml](.github/workflows/module.yml) with the new changes in the workspace.
+> To add or remove a module within [go.work](go.work), we must use the following tasks to synchronize the workflow of [release.yml](.github/workflows/release.yml) with the new changes in the workspace.
 
 Add new module to workspace
 
