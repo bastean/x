@@ -1,11 +1,15 @@
 {
-  "[go]": {
-    "editor.defaultFormatter": "golang.go"
-  },
   "cSpell.language": "en,lorem",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "diffEditor.maxComputationTime": 0,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
+  "go.alternateTools": {
+    "customFormatter": "golangci-lint"
+  },
+  "go.formatFlags": ["fmt", "--stdin"],
+  "go.formatTool": "custom",
   "go.lintTool": "golangci-lint",
   "go.toolsManagement.autoUpdate": true,
   "gopls": {
