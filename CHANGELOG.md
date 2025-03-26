@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.0](https://github.com/bastean/x/compare/v0.5.0...v0.6.0) (2025-03-26)
+
+### Chores
+
+- **deps:** upgrade ([20a7505](https://github.com/bastean/x/commit/20a7505e16f43732fcf2f2b7c313c886d98e2c2f))
+- **release:** tools/v0.2.4 ([8eb08ce](https://github.com/bastean/x/commit/8eb08ce0b0d42cb36a05fd1c83bbba90d382f31a))
+
+### Continuous Integration
+
+- **github:** add permissions to jobs instead of using general ones ([3d815f7](https://github.com/bastean/x/commit/3d815f74805da90ea885529a8d09d07a1810ba8e))
+- **github:** rename module workflow to release ([16bcba1](https://github.com/bastean/x/commit/16bcba1b95c7f0a14d6151f76fb4fa86467bf55f))
+- **github:** rename release workflow to summary ([c13ae35](https://github.com/bastean/x/commit/c13ae351bc5a7afafbb9fc058aab6e40c18d9048))
+- **github:** squash ci workflow jobs into a single one ([f55c2ca](https://github.com/bastean/x/commit/f55c2ca30640d167d306555570da26153ca4b4ad))
+
+### Bug Fixes
+
+- **golangci-lint:** migrate to v2 ([841e726](https://github.com/bastean/x/commit/841e726301acf2b7f136b73bb727a173f106eeea))
+
 ## [0.5.0](https://github.com/bastean/x/compare/v0.4.0...v0.5.0) (2025-03-18)
 
 ### Chores
