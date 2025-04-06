@@ -19,9 +19,6 @@ type ExplorerTestSuite struct {
 }
 
 func (s *ExplorerTestSuite) SetupSuite() {
-	s.Equal(cdeps.EveryMinFile, `^.+\.min\.(js|css)$`)
-	s.Equal(cdeps.EveryWoff2File, `^.+\.woff2$`)
-
 	s.directory = "ignore"
 
 	s.file = "ignore.test"
@@ -87,36 +84,43 @@ func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
 	s.Equal(expected, actual)
 }
 
-func (s *ExplorerTestSuite) TestCopyDeps() {
+func (s *ExplorerTestSuite) TestCopyDependency() {
 	path, files := cdeps.RandomFiles(s.directory, s.extensions)
 
-	s.NoError(s.SUT.CopyDeps(files, path, s.directory))
+	for _, file := range files {
+		s.NoError(s.SUT.CopyDependency(file, path, s.directory))
+	}
 
 	for _, file := range files {
 		s.FileExists(filepath.Join(s.directory, file))
 	}
 }
 
-func (s *ExplorerTestSuite) TestCopyDepsMin() {
+func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
+	const (
+		everyMinFile   = `^.+\.min\.(js|css)$`
+		everyWoff2File = `^.+\.woff2$`
+	)
+
 	path, files := cdeps.RandomFiles(s.directory, s.extensions)
 
-	s.NoError(s.SUT.CopyDeps([]string{cdeps.EveryMinFile}, path, s.directory))
+	s.NoError(s.SUT.CopyDependency(everyMinFile, path, s.directory))
 
-	s.NoError(s.SUT.CopyDeps([]string{cdeps.EveryWoff2File}, path, s.directory))
+	s.NoError(s.SUT.CopyDependency(everyWoff2File, path, s.directory))
 
 	for _, file := range files {
 		s.FileExists(filepath.Join(s.directory, file))
 	}
 }
 
-func (s *ExplorerTestSuite) TestCopyDepsErrFailed() {
-	files := []string{s.file}
+func (s *ExplorerTestSuite) TestCopyDependencyErrFailed() {
+	file := s.file
 
 	source := "undefined"
 
-	actual := s.SUT.CopyDeps(files, source, s.directory)
+	actual := s.SUT.CopyDependency(file, source, s.directory)
 
-	expected := fmt.Errorf("failed to copy \"%s\" from \"%s\"", files, source)
+	expected := fmt.Errorf("failed to copy \"%s\" from \"%s\"", file, source)
 
 	s.Equal(expected, actual)
 }
