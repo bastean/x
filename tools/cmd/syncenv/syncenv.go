@@ -14,8 +14,7 @@ const (
 )
 
 var (
-	path     string
-	template string
+	template, envs string
 )
 
 func usage() {
@@ -29,27 +28,27 @@ func fatal(what string) {
 }
 
 func main() {
-	flag.StringVar(&path, "p", ".", "Path to \".env\" files (required)")
+	flag.StringVar(&template, "t", "", "Path to \".env\" file template (required)")
 
-	flag.StringVar(&template, "t", ".env.example", ".env file template (required)")
+	flag.StringVar(&envs, "e", "", "Path to \".env\" files directory (required)")
 
 	flag.Usage = usage
 
 	flag.Parse()
 
-	if flag.NFlag() == 0 {
+	if flag.NFlag() < 2 {
 		flag.Usage()
 
 		println()
 
-		fatal("define required flags")
+		fatal("Please define required flags")
 	}
 
-	log.Println("Starting...")
+	log.Println("Starting synchronization...")
 
-	if err := syncenv.Up(path, template); err != nil {
+	if err := syncenv.Up(template, envs); err != nil {
 		fatal(err.Error())
 	}
 
-	log.Println("Completed!")
+	log.Println("Synchronization completed!")
 }

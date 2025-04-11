@@ -19,9 +19,7 @@ type BackupTestSuite struct {
 }
 
 func (s *BackupTestSuite) SetupSuite() {
-	s.Equal(syncenv.ExtBackup, `.bak`)
-
-	s.Equal(syncenv.RExBackup, `^.+\.bak$`)
+	s.Equal(syncenv.ExtBackup, ".syncenv.bak")
 
 	s.directory = "ignore"
 
@@ -29,15 +27,16 @@ func (s *BackupTestSuite) SetupSuite() {
 }
 
 func (s *BackupTestSuite) SetupTest() {
-	_ = os.RemoveAll(s.directory)
+	s.NoError(os.RemoveAll(s.directory))
+	s.NoError(os.MkdirAll(s.directory, 0700))
 }
 
-func (s *BackupTestSuite) TestFile() {
+func (s *BackupTestSuite) TestCreate() {
 	source, file, expected := syncenv.RandomFile(s.directory)
 
-	s.NoError(s.SUT.File(file, source, source))
+	s.NoError(s.SUT.Create(filepath.Join(source, file)))
 
-	backup := filepath.Join(source, file+".bak")
+	backup := filepath.Join(source, file+".syncenv.bak")
 
 	s.FileExists(backup)
 
@@ -48,48 +47,46 @@ func (s *BackupTestSuite) TestFile() {
 	s.Equal(expected, actual)
 }
 
-func (s *BackupTestSuite) TestFileErrFailedReading() {
-	file := syncenv.RandomUndefinedFileWithExtension(s.directory)
+func (s *BackupTestSuite) TestCreateErrFailedReading() {
+	file := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomUndefinedFile(s.directory))
 
-	source := syncenv.RandomUndefinedPath(s.directory)
+	actual := s.SUT.Create(file)
 
-	actual := s.SUT.File(file, source, source)
-
-	expected := fmt.Errorf("failed to read %q from %q [%s]", file, source, errors.Extract(actual))
+	expected := fmt.Errorf("failed to read %q [%s]", file, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
-func (s *BackupTestSuite) TestFileErrFailedWriting() {
+func (s *BackupTestSuite) TestCreateErrFailedWriting() {
 	source, file, _ := syncenv.RandomFile(s.directory)
 
-	target := syncenv.RandomUndefinedPath(s.directory)
+	file = filepath.Join(source, file)
 
-	actual := s.SUT.File(file, source, target)
+	s.NoError(os.WriteFile(file+".syncenv.bak", []byte(""), 0400))
 
-	expected := fmt.Errorf("failed to write %q on %q [%s]", file+".bak", target, errors.Extract(actual))
+	actual := s.SUT.Create(file)
+
+	expected := fmt.Errorf("failed to write %q [%s]", file+".syncenv.bak", errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *BackupTestSuite) TestRestore() {
-	source, original, expected := syncenv.RandomFile(s.directory)
+	source, file, expected := syncenv.RandomFile(s.directory)
 
-	s.NoError(s.SUT.File(original, source, source))
+	file = filepath.Join(source, file)
 
-	backup := original + ".bak"
+	s.NoError(s.SUT.Create(file))
 
-	original = filepath.Join(source, original)
+	s.NoError(os.Remove(file))
 
-	s.NoError(os.Remove(original))
+	s.NoFileExists(file)
 
-	s.NoFileExists(original)
+	s.NoError(s.SUT.Restore(file))
 
-	s.NoError(s.SUT.Restore(backup, source))
+	s.FileExists(file)
 
-	s.FileExists(original)
-
-	actual, err := os.ReadFile(original) //nolint:gosec
+	actual, err := os.ReadFile(file) //nolint:gosec
 
 	s.NoError(err)
 
@@ -97,15 +94,11 @@ func (s *BackupTestSuite) TestRestore() {
 }
 
 func (s *BackupTestSuite) TestRestoreErrFailure() {
-	original := syncenv.RandomUndefinedFileWithExtension(s.directory)
+	file := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomUndefinedFile(s.directory))
 
-	backup := original + ".bak"
+	actual := s.SUT.Restore(file)
 
-	source := syncenv.RandomUndefinedPath(s.directory)
-
-	actual := s.SUT.Restore(backup, source)
-
-	expected := fmt.Errorf("failure to restore file %q from %q [%s]", original, backup, errors.Extract(actual))
+	expected := fmt.Errorf("failure to restore file %q [%s]", file, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
@@ -113,29 +106,28 @@ func (s *BackupTestSuite) TestRestoreErrFailure() {
 func (s *BackupTestSuite) TestRemove() {
 	source, file, _ := syncenv.RandomFile(s.directory)
 
-	s.NoError(s.SUT.File(file, source, source))
+	file = filepath.Join(source, file)
 
-	backup := file + ".bak"
+	s.NoError(s.SUT.Create(file))
 
-	s.NoError(s.SUT.Remove(backup, source))
+	s.NoError(s.SUT.Remove(file))
 
-	s.NoFileExists(filepath.Join(source, backup))
+	s.NoFileExists(file + ".syncenv.bak")
 }
 
 func (s *BackupTestSuite) TestRemoveErrFailure() {
-	backup := syncenv.RandomFilename() + ".bak"
+	backup := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomFilename())
 
-	source := syncenv.RandomUndefinedPath(s.directory)
+	actual := s.SUT.Remove(backup)
 
-	actual := s.SUT.Remove(backup, source)
-
-	expected := fmt.Errorf("failure to remove backup %q from %q [%s]", backup, source, errors.Extract(actual))
+	expected := fmt.Errorf("failure to remove backup %q [%s]", backup+".syncenv.bak", errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *BackupTestSuite) TearDownTest() {
-	_ = os.RemoveAll(s.directory)
+	s.NoError(os.Chmod(s.directory, 0700)) //nolint:gosec
+	s.NoError(os.RemoveAll(s.directory))
 }
 
 func TestIntegrationBackupSuite(t *testing.T) {

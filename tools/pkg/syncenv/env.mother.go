@@ -37,30 +37,22 @@ func RandomEnvs() []string {
 	return RandomEnvValues(services.Create.Bool())
 }
 
-func EnvsWithEmptyValues() []string {
-	return []string{}
-}
-
 func RandomTemplateEnvs() []string {
 	return RandomEnvValues(true)
 }
 
-func RandomTargetEnvs() []string {
+func RandomFileEnvs() []string {
 	return RandomEnvValues(false)
 }
 
+func EnvsWithEmptyValues() []string {
+	return []string{}
+}
+
 func RandomEnvFile(envs, path string) (string, string) {
-	path = filepath.Join(path, "random")
+	file := services.Create.LoremIpsumWord()
 
-	err := os.MkdirAll(path, 0700)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	file := services.Create.LoremIpsumWord() + ".random"
-
-	err = os.WriteFile(filepath.Join(path, file), []byte(envs), 0600)
+	err := os.WriteFile(filepath.Join(path, file), []byte(envs), 0600)
 
 	if err != nil {
 		panic(err.Error())

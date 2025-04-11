@@ -25,7 +25,8 @@ func (s *EnvTestSuite) SetupSuite() {
 }
 
 func (s *EnvTestSuite) SetupTest() {
-	_ = os.RemoveAll(s.directory)
+	s.NoError(os.RemoveAll(s.directory))
+	s.NoError(os.MkdirAll(s.directory, 0700))
 }
 
 func (s *EnvTestSuite) TestDump() {
@@ -65,19 +66,15 @@ func (s *EnvTestSuite) TestSync() {
 
 	s.NoError(err)
 
-	targetEnvs := syncenv.RandomTargetEnvs()
+	targetEnvs := syncenv.RandomFileEnvs()
 
 	targetSource, targetFile := syncenv.RandomEnvFile(strings.Join(targetEnvs, ""), s.directory)
 
-	targetEnvs, err = s.SUT.Dump(filepath.Join(targetSource, targetFile))
+	target := filepath.Join(targetSource, targetFile)
 
-	s.NoError(err)
+	s.NoError(s.SUT.Sync(templateEnvs, target))
 
-	synchronized := filepath.Join(targetSource, targetFile)
-
-	s.NoError(s.SUT.Sync(templateEnvs, targetEnvs, synchronized))
-
-	envs, err := os.ReadFile(synchronized) //nolint:gosec
+	envs, err := os.ReadFile(target) //nolint:gosec
 
 	s.NoError(err)
 
@@ -91,19 +88,22 @@ func (s *EnvTestSuite) TestSync() {
 func (s *EnvTestSuite) TestSyncErrOverwriting() {
 	templateEnvs := syncenv.EnvsWithEmptyValues()
 
-	targetEnvs := syncenv.EnvsWithEmptyValues()
+	targetSource, targetFile := syncenv.RandomEnvFile("", s.directory)
 
-	synchronized := syncenv.RandomUndefinedEnvPath(s.directory)
+	target := filepath.Join(targetSource, targetFile)
 
-	actual := s.SUT.Sync(templateEnvs, targetEnvs, synchronized)
+	s.NoError(os.Chmod(target, 0400))
 
-	expected := fmt.Errorf("failure to overwrite %q [%s]", synchronized, errors.Extract(actual))
+	actual := s.SUT.Sync(templateEnvs, target)
+
+	expected := fmt.Errorf("failure to overwrite %q [%s]", target, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *EnvTestSuite) TearDownTest() {
-	_ = os.RemoveAll(s.directory)
+	s.NoError(os.Chmod(s.directory, 0700)) //nolint:gosec
+	s.NoError(os.RemoveAll(s.directory))
 }
 
 func TestIntegrationEnvSuite(t *testing.T) {

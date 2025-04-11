@@ -8,11 +8,11 @@ import (
 
 type Env struct{}
 
-func (*Env) Dump(path string) ([]string, error) {
-	data, err := os.ReadFile(path) //nolint:gosec
+func (*Env) Dump(file string) ([]string, error) {
+	data, err := os.ReadFile(file) //nolint:gosec
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to read %q [%s]", path, err)
+		return nil, fmt.Errorf("failed to read %q [%s]", file, err)
 	}
 
 	envs := strings.Split(string(data), "\n")
@@ -20,35 +20,45 @@ func (*Env) Dump(path string) ([]string, error) {
 	return envs, nil
 }
 
-func (e *Env) Sync(templateEnvs, targetEnvs []string, targetPath string) error {
+func (e *Env) Sync(envs []string, file string) error {
+	fileEnvs, err := e.Dump(file)
+
+	if err != nil {
+		return err
+	}
+
+	if len(envs) > 0 && envs[len(envs)-1] == "" {
+		envs = envs[:len(envs)-1]
+	}
+
 	var syncEnvs string
 	var isNotUpdated bool
 
-	for _, templateEnv := range templateEnvs {
+	for _, env := range envs {
 		isNotUpdated = true
 
-		if templateEnv == "" {
+		if env == "" {
 			syncEnvs += "\n"
 			continue
 		}
 
-		for _, targetEnv := range targetEnvs {
-			if strings.Contains(targetEnv, templateEnv) {
-				syncEnvs += targetEnv + "\n"
+		for _, fileEnv := range fileEnvs {
+			if strings.Contains(fileEnv, env) {
+				syncEnvs += fileEnv + "\n"
 				isNotUpdated = false
 				break
 			}
 		}
 
 		if isNotUpdated {
-			syncEnvs += templateEnv + "\n"
+			syncEnvs += env + "\n"
 		}
 	}
 
-	err := os.WriteFile(targetPath, []byte(syncEnvs), 0600)
+	err = os.WriteFile(file, []byte(syncEnvs), 0600)
 
 	if err != nil {
-		return fmt.Errorf("failure to overwrite %q [%s]", targetPath, err)
+		return fmt.Errorf("failure to overwrite %q [%s]", file, err)
 	}
 
 	return nil

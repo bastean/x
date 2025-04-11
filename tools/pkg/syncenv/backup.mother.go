@@ -8,19 +8,11 @@ import (
 )
 
 func RandomFile(path string) (string, string, []byte) {
-	path = filepath.Join(path, "random")
-
-	err := os.MkdirAll(path, 0700)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	file := services.Create.LoremIpsumWord() + ".random"
+	file := services.Create.LoremIpsumWord()
 
 	content := []byte(services.Create.Message())
 
-	err = os.WriteFile(filepath.Join(path, file), content, 0600)
+	err := os.WriteFile(filepath.Join(path, file), content, 0600)
 
 	if err != nil {
 		panic(err.Error())
@@ -35,10 +27,6 @@ func RandomFilename() string {
 
 func RandomUndefinedFile(path string) string {
 	return filepath.Join(path, services.Create.LoremIpsumWord())
-}
-
-func RandomUndefinedFileWithExtension(path string) string {
-	return filepath.Join(path, services.Create.LoremIpsumWord()+"."+services.Create.FileExtension())
 }
 
 func RandomUndefinedPath(path string) string {
