@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0](https://github.com/bastean/x/compare/v0.6.0...v0.7.0) (2025-04-11)
+
+### Chores
+
+- **deps:** upgrade ([dc7fc4d](https://github.com/bastean/x/commit/dc7fc4d4f5f2dc55eb10e6af19eaa00e1151da44))
+- **release:** tools/v0.3.0 ([be1e9d4](https://github.com/bastean/x/commit/be1e9d441a60dab54212fb146b618c77ebcd9e43))
+- **tools:** add copydeps script ([1453ba7](https://github.com/bastean/x/commit/1453ba76479aee424b5695463999a6a11717c040))
+- **tools:** add syncenv script ([78e034f](https://github.com/bastean/x/commit/78e034f30db45aefdf375c280ae2c590bf7dba1d))
+- **vscode:** add go default formatter ([f9f66dd](https://github.com/bastean/x/commit/f9f66dd906c8831cf1c2c10447821569b7b544ad))
+
+### New Features
+
+- **tools:** add cdeps cmd ([cd989a0](https://github.com/bastean/x/commit/cd989a0212aa3bac5ffb60ddebad1ad2f2f4acb4))
+- **tools:** add cdeps package ([ee312f4](https://github.com/bastean/x/commit/ee312f4944c4c8b2c0963bc75411f140e07e0c2d))
+- **tools:** add syncenv cmd ([85da7bd](https://github.com/bastean/x/commit/85da7bd26d604599015940df84e19f99d8f68868))
+- **tools:** add syncenv package ([0d188eb](https://github.com/bastean/x/commit/0d188ebb4b6f96bab8ca9d70c46ef8be25684882))
+
 ## [0.6.0](https://github.com/bastean/x/compare/v0.5.0...v0.6.0) (2025-03-26)
 
 ### Chores
