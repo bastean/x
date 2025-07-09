@@ -4,8 +4,9 @@
     "esbenp.prettier-vscode",
     "github.vscode-github-actions",
     "golang.go",
-    "Gruntfuggly.todo-tree",
+    "gruntfuggly.todo-tree",
     "redhat.vscode-yaml",
+    "stackbreak.comment-divider",
     "streetsidesoftware.code-spell-checker",
     "tamasfe.even-better-toml",
     "task.vscode-task"
