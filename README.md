@@ -113,7 +113,6 @@ git clone git@github.com:bastean/x.git && cd x
 #### Locally
 
 1. System Requirements
-
    - [Go](https://go.dev/doc/install)
    - [Task](https://taskfile.dev/installation)
 
