@@ -7,19 +7,25 @@ includes:
     flatten: true
 
 vars:
-  #* URL
+  # ------------------------------------ URL ----------------------------------- #
+
   URL_GITHUB: https://github.com/bastean/x
 
-  #* Go
+  # ------------------------------------ Go ------------------------------------ #
+
   GO_WORK: github.com/bastean/x
   GO_MODULES:
     sh: find -name "go.mod" -type f -exec bash -c "dirname {} | xargs basename" ";"
 
-  #* Prompt
+  # ---------------------------------- Prompt ---------------------------------- #
+
   PROMPT_WARNING: This is a dangerous command... Do you want to continue?
 
 tasks:
-  #* Bin
+  # ---------------------------------------------------------------------------- #
+  #                                      Bin                                     #
+  # ---------------------------------------------------------------------------- #
+
   bashrc:
     internal: true
     requires:
@@ -28,15 +34,15 @@ tasks:
       - echo -e "{{.CONFIG}}" >> ~/.bashrc
       - . ~/.bashrc
 
-  dir-config: &dir-config
+  working-dir: &working-dir
     dir: "{{if .DIR}}{{.DIR}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
 
   bash:
-    <<: *dir-config
+    <<: *working-dir
     internal: true
     requires:
-      vars: ["CMD"]
-    cmd: bash -o pipefail -c '{{.CMD}}'
+      vars: ["RUN"]
+    cmd: bash -o pipefail -c '{{.RUN}}'
 
   curl:
     internal: true
@@ -67,7 +73,7 @@ tasks:
       - for: { var: PACKAGES, as: PACKAGE }
         cmd: go install {{.PACKAGE}}
 
-  go-modules-config: &go-modules-config
+  go-module: &go-module
     internal: true
     requires:
       vars: ["MODULE"]
@@ -76,12 +82,12 @@ tasks:
   go-modules:
     internal: true
     requires:
-      vars: ["TASK"]
+      vars: ["RUN"]
     vars:
       LIST: "{{.GO_MODULES}}"
     cmds:
       - for: { var: LIST, as: MODULE }
-        task: "{{.TASK}}"
+        task: "{{.RUN}}"
         vars:
           MODULE: "{{.MODULE}}"
 
@@ -129,27 +135,39 @@ tasks:
     internal: true
     cmd: git reset --hard HEAD
 
-  #* Upgrade
+  # ---------------------------------------------------------------------------- #
+  #                                    Upgrade                                   #
+  # ---------------------------------------------------------------------------- #
+
   upgrade-managers:
     cmds:
-      - sudo apt update
-      #? - sudo apt upgrade -y
       - sudo apt install -y python3
       - task: curl
         vars:
           URL: https://bun.sh/install
           PIPE: sudo BUN_INSTALL=/usr/local bash
 
+  upgrade-system:
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      DEBIAN_PRIORITY: critical
+      NEEDRESTART_MODE: a
+    cmds:
+      - sudo apt update -y
+      - sudo apt upgrade -y
+      - sudo apt autoremove -y
+      - task: upgrade-managers
+
+  upgrade-go-module:
+    <<: *go-module
+    cmd: go get -t -u ./...
+
   upgrade-go:
     cmds:
       - task: go-modules
         vars:
-          TASK: upgrade-go-modules
+          RUN: upgrade-go-module
       - task: work-sync
-
-  upgrade-go-modules:
-    <<: *go-modules-config
-    cmd: go get -t -u ./...
 
   upgrade-bun:
     cmds:
@@ -171,7 +189,10 @@ tasks:
       - task: git-reset-hard
       - task: bun-ci
 
-  #* Install
+  # ---------------------------------------------------------------------------- #
+  #                                    Install                                   #
+  # ---------------------------------------------------------------------------- #
+
   install-scanners:
     cmds:
       - task: go-install
@@ -192,10 +213,6 @@ tasks:
         vars:
           URL: https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh
           PIPE: sudo sh -s -- -b $(go env GOPATH)/bin
-      - task: go-install
-        vars:
-          PACKAGES:
-            - golang.org/x/tools/cmd/goimports@latest
 
   install-debuggers:
     cmds:
@@ -228,23 +245,32 @@ tasks:
     cmds:
       - task: install-tools-dev
 
-  #* Download
+  # ---------------------------------------------------------------------------- #
+  #                                   Download                                   #
+  # ---------------------------------------------------------------------------- #
+
   download-dependencies:
     cmds:
       - go mod download
       - task: work-sync
       - task: bun-ci
 
-  #* Restore
+  # ---------------------------------------------------------------------------- #
+  #                                    Restore                                   #
+  # ---------------------------------------------------------------------------- #
+
   restore:
     cmds:
       - bunx husky init
       - git restore .
 
-  #* Init
+  # ---------------------------------------------------------------------------- #
+  #                                     Init                                     #
+  # ---------------------------------------------------------------------------- #
+
   init:
     cmds:
-      - task: upgrade-managers
+      - task: upgrade-system
       - task: install-tooling
       - task: download-dependencies
       - task: restore
@@ -262,7 +288,10 @@ tasks:
       - git add .
       - task: init
 
-  #* Scan
+  # ---------------------------------------------------------------------------- #
+  #                                     Scan                                     #
+  # ---------------------------------------------------------------------------- #
+
   scan-secrets-local:
     cmds:
       - task: trufflehog-git
@@ -313,51 +342,60 @@ tasks:
       - task: scan-vulns
       - task: scan-misconfigs
 
-  #* Lint/Format
-  lint:
-    cmds:
-      - task: go-modules
-        vars:
-          TASK: lint-modules
-      - task: prettier-write
+  # ---------------------------------------------------------------------------- #
+  #                                  Lint/Format                                 #
+  # ---------------------------------------------------------------------------- #
 
-  lint-modules:
-    <<: *go-modules-config
+  lint-module:
+    <<: *go-module
     cmds:
       - go mod tidy
       - go mod verify
       - golangci-lint run --fix
       - golangci-lint fmt
 
+  lint:
+    cmds:
+      - task: go-modules
+        vars:
+          RUN: lint-module
+      - task: prettier-write
+
+  lint-check-module:
+    <<: *go-module
+    cmd: golangci-lint run
+
   lint-check:
     cmds:
       - task: go-modules
         vars:
-          TASK: lint-check-modules
+          RUN: lint-check-module
       - task: prettier-check
 
-  lint-check-modules:
-    <<: *go-modules-config
-    cmd: golangci-lint run
+  # ---------------------------------------------------------------------------- #
+  #                                     Debug                                    #
+  # ---------------------------------------------------------------------------- #
 
-  #* Debug
+  debug-dead-module:
+    <<: *go-module
+    cmd: deadcode -test ./...
+
   debug-dead:
     cmds:
       - task: go-modules
         vars:
-          TASK: debug-dead-modules
-
-  debug-dead-modules:
-    <<: *go-modules-config
-    cmd: deadcode -test ./...
+          RUN: debug-dead-module
 
   debugs:
     cmds:
       - task: debug-dead
 
-  #* Test
+  # ---------------------------------------------------------------------------- #
+  #                                     Test                                     #
+  # ---------------------------------------------------------------------------- #
+
   test-clean:
-    <<: *dir-config
+    <<: *working-dir
     cmds:
       - go clean -testcache
       - mkdir -p test/report
@@ -368,16 +406,10 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+          RUN: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
-  test-units:
-    cmds:
-      - task: go-modules
-        vars:
-          TASK: test-unit-modules
-
-  test-unit-modules:
-    <<: *go-modules-config
+  test-unit-module:
+    <<: *go-module
     cmds:
       - task: test-clean
         vars:
@@ -385,7 +417,13 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+          RUN: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+
+  test-units:
+    cmds:
+      - task: go-modules
+        vars:
+          RUN: test-unit-module
 
   test-integration:
     dir: "{{.USER_WORKING_DIR}}"
@@ -393,16 +431,10 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+          RUN: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
-  test-integrations:
-    cmds:
-      - task: go-modules
-        vars:
-          TASK: test-integration-modules
-
-  test-integration-modules:
-    <<: *go-modules-config
+  test-integration-module:
+    <<: *go-module
     cmds:
       - task: test-clean
         vars:
@@ -410,7 +442,13 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+          RUN: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+
+  test-integrations:
+    cmds:
+      - task: go-modules
+        vars:
+          RUN: test-integration-module
 
   test-acceptance:
     dir: "{{.USER_WORKING_DIR}}"
@@ -418,16 +456,50 @@ tasks:
       - task: test-clean
       - task: bash
         vars:
-          CMD: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+          RUN: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+
+  test-acceptance-module:
+    <<: *go-module
+    cmds:
+      - task: test-clean
+        vars:
+          DIR: "{{.MODULE}}"
+      - task: bash
+        vars:
+          DIR: "{{.MODULE}}"
+          RUN: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
   test-acceptances:
     cmds:
       - task: go-modules
         vars:
-          TASK: test-acceptance-modules
+          RUN: test-acceptance-module
 
-  test-acceptance-modules:
-    <<: *go-modules-config
+  test-flaky:
+    <<: *working-dir
+    vars:
+      RANDOM: "{{randIntN 10 | add 3}}"
+      ITERATE: "{{.RANDOM | int | until}}"
+    cmds:
+      - task: prompt-"Iterations \"{{.RANDOM}}\""
+      - for: { var: ITERATE }
+        cmd: echo "Iteration \"{{trimAll "[]" .ITEM | add1}}/{{.RANDOM}}\"" && task test-unit
+
+  test-flaky-module:
+    <<: *go-module
+    cmds:
+      - task: test-flaky
+        vars:
+          DIR: "{{.MODULE}}"
+
+  tests-flaky:
+    cmds:
+      - task: go-modules
+        vars:
+          RUN: test-flaky-module
+
+  tests-module:
+    <<: *go-module
     cmds:
       - task: test-clean
         vars:
@@ -435,26 +507,18 @@ tasks:
       - task: bash
         vars:
           DIR: "{{.MODULE}}"
-          CMD: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+          RUN: go test -count=1 -race -v -cover ./... |& tee test/report/report.log
 
   tests:
     cmds:
       - task: go-modules
         vars:
-          TASK: tests-modules
+          RUN: tests-module
 
-  tests-modules:
-    <<: *go-modules-config
-    cmds:
-      - task: test-clean
-        vars:
-          DIR: "{{.MODULE}}"
-      - task: bash
-        vars:
-          DIR: "{{.MODULE}}"
-          CMD: go test -count=1 -race -v -cover ./... |& tee test/report/report.log
+  # ---------------------------------------------------------------------------- #
+  #                                     Build                                    #
+  # ---------------------------------------------------------------------------- #
 
-  #* Build
   build-*:
     dir: "{{.USER_WORKING_DIR}}"
     requires:
@@ -468,7 +532,10 @@ tasks:
       - rm -rf build/
       - go build -ldflags="-s -w" -o build/{{.BINARY}} ./cmd/{{.BINARY}}
 
-  #* Release
+  # ---------------------------------------------------------------------------- #
+  #                                    Release                                   #
+  # ---------------------------------------------------------------------------- #
+
   release:
     cmds:
       - task: release-it
@@ -515,7 +582,10 @@ tasks:
         vars:
           OPTIONS: --changelog
 
-  #* Go
+  # ---------------------------------------------------------------------------- #
+  #                                      Go                                      #
+  # ---------------------------------------------------------------------------- #
+
   work-use-*:
     requires:
       vars: ["MODULE"]
@@ -536,7 +606,10 @@ tasks:
       - rm -rf {{.MODULE}} && task upgrade-workflow
       - task: work-sync
 
-  #* Git
+  # ---------------------------------------------------------------------------- #
+  #                                      Git                                     #
+  # ---------------------------------------------------------------------------- #
+
   commit: bunx czg
 
   git-v*:
@@ -628,10 +701,16 @@ tasks:
       - task: git-reset-hard
       - task: init
 
-  #* Mailpit
+  # ---------------------------------------------------------------------------- #
+  #                                    Mailpit                                   #
+  # ---------------------------------------------------------------------------- #
+
   mailpit: mailpit --smtp-auth-allow-insecure --smtp-auth-accept-any
 
-  #* Fix
+  # ---------------------------------------------------------------------------- #
+  #                                      Fix                                     #
+  # ---------------------------------------------------------------------------- #
+
   fix-dev:
     cmds:
       - task: upgrade-go

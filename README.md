@@ -132,10 +132,18 @@ git clone git@github.com:bastean/x.git && cd x
 cd <module> && task test-unit
 ```
 
+```bash
+cd <module> && task test-flaky
+```
+
 ##### Unit (Multi-Module)
 
 ```bash
 task test-units
+```
+
+```bash
+task tests-flaky
 ```
 
 ##### Integration (Single-Module)
