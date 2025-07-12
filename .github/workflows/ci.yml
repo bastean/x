@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  Required:
+  Sentinel:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -19,20 +19,17 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Secret
-        run: task scan-secrets-local
-
-      - name: Vulnerability
-        run: task scan-vulns-local
-
-      - name: Misconfiguration
-        run: task scan-misconfigs-local
+      - name: Scan
+        run: |
+          task scan-secrets-local
+          task scan-vulns-local
+          task scan-misconfigs-local
 
       - name: Lint
         run: task lint-check
 
       - name: Test
-        run: task test-units
+        run: task tests-flaky
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
