@@ -5,9 +5,9 @@ tasks:
     cmds:
       - task: prompt-"Starting upgrades..."
       - task: prompt-"Linting..."
-      - task: lint
+      - task: lints
       - task: prompt-"Upgrading Go"
-      - task: upgrade-go
+      - task: upgrades-go
       - task: prompt-"Upgrading Bun"
       - task: upgrade-bun
       - task: prompt-"Upgrading Tooling"
@@ -15,9 +15,9 @@ tasks:
       - task: prompt-"Upgrading Workflow"
       - task: upgrade-workflow
       - task: prompt-"Linting..."
-      - task: lint
+      - task: lints
       - task: prompt-"Testing..."
-      - task: test-units
+      - task: tests-unit
       - task: prompt-"Committing upgrades"
       - git add . --update
       - 'git commit -m "chore(deps): upgrade"'

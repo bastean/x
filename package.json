@@ -113,11 +113,11 @@
     },
     "hooks": {
       "before:init": [
-        "task lint-check",
-        "task test-units"
+        "task lints-check",
+        "task tests-unit"
       ],
       "before:release": [
-        "task lint",
+        "task lints",
         "git add . --update"
       ],
       "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}"

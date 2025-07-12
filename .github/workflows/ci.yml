@@ -26,7 +26,7 @@ jobs:
           task scan-misconfigs-local
 
       - name: Lint
-        run: task lint-check
+        run: task lints-check
 
       - name: Test
         run: task tests-flaky

@@ -139,7 +139,7 @@ cd <module> && task test-flaky
 ##### Unit (Multi-Module)
 
 ```bash
-task test-units
+task tests-unit
 ```
 
 ```bash
@@ -155,7 +155,7 @@ cd <module> && task test-integration
 ##### Integration (Multi-Module)
 
 ```bash
-task test-integrations
+task tests-integration
 ```
 
 ##### Acceptance (Single-Module)
@@ -167,7 +167,7 @@ cd <module> && task test-acceptance
 ##### Acceptance (Multi-Module)
 
 ```bash
-task test-acceptances
+task tests-acceptance
 ```
 
 ##### Unit / Integration / Acceptance (Multi-Module)

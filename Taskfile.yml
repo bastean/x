@@ -34,11 +34,11 @@ tasks:
       - echo -e "{{.CONFIG}}" >> ~/.bashrc
       - . ~/.bashrc
 
-  working-dir: &working-dir
-    dir: "{{if .DIR}}{{.DIR}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
+  module: &module
+    dir: "{{if .MODULE}}{{.MODULE}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
 
   bash:
-    <<: *working-dir
+    <<: *module
     internal: true
     requires:
       vars: ["RUN"]
@@ -73,11 +73,15 @@ tasks:
       - for: { var: PACKAGES, as: PACKAGE }
         cmd: go install {{.PACKAGE}}
 
-  go-module: &go-module
+  go-module:
     internal: true
     requires:
-      vars: ["MODULE"]
-    dir: "{{.MODULE}}"
+      vars: ["RUN", "MODULE"]
+    cmds:
+      - task: prompt-"Module \"{{.MODULE}}\""
+      - task: "{{.RUN}}"
+        vars:
+          MODULE: "{{.MODULE}}"
 
   go-modules:
     internal: true
@@ -87,8 +91,9 @@ tasks:
       LIST: "{{.GO_MODULES}}"
     cmds:
       - for: { var: LIST, as: MODULE }
-        task: "{{.RUN}}"
+        task: go-module
         vars:
+          RUN: "{{.RUN}}"
           MODULE: "{{.MODULE}}"
 
   work-sync:
@@ -158,15 +163,15 @@ tasks:
       - sudo apt autoremove -y
       - task: upgrade-managers
 
-  upgrade-go-module:
-    <<: *go-module
+  upgrade-go:
+    <<: *module
     cmd: go get -t -u ./...
 
-  upgrade-go:
+  upgrades-go:
     cmds:
       - task: go-modules
         vars:
-          RUN: upgrade-go-module
+          RUN: upgrade-go
       - task: work-sync
 
   upgrade-bun:
@@ -346,174 +351,147 @@ tasks:
   #                                  Lint/Format                                 #
   # ---------------------------------------------------------------------------- #
 
-  lint-module:
-    <<: *go-module
+  lint:
+    <<: *module
     cmds:
       - go mod tidy
       - go mod verify
       - golangci-lint run --fix
       - golangci-lint fmt
 
-  lint:
+  lints:
     cmds:
       - task: go-modules
         vars:
-          RUN: lint-module
+          RUN: lint
       - task: prettier-write
 
-  lint-check-module:
-    <<: *go-module
+  lint-check:
+    <<: *module
     cmd: golangci-lint run
 
-  lint-check:
+  lints-check:
     cmds:
       - task: go-modules
         vars:
-          RUN: lint-check-module
+          RUN: lint-check
       - task: prettier-check
 
   # ---------------------------------------------------------------------------- #
   #                                     Debug                                    #
   # ---------------------------------------------------------------------------- #
 
-  debug-dead-module:
-    <<: *go-module
+  debug-dead:
+    <<: *module
     cmd: deadcode -test ./...
 
-  debug-dead:
+  debugs-dead:
     cmds:
       - task: go-modules
         vars:
-          RUN: debug-dead-module
+          RUN: debug-dead
 
   debugs:
     cmds:
-      - task: debug-dead
+      - task: debugs-dead
 
   # ---------------------------------------------------------------------------- #
   #                                     Test                                     #
   # ---------------------------------------------------------------------------- #
 
   test-clean:
-    <<: *working-dir
+    <<: *module
     cmds:
       - go clean -testcache
       - mkdir -p test/report
 
   test-unit:
-    dir: "{{.USER_WORKING_DIR}}"
-    cmds:
-      - task: test-clean
-      - task: bash
-        vars:
-          RUN: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
-
-  test-unit-module:
-    <<: *go-module
+    <<: *module
     cmds:
       - task: test-clean
         vars:
-          DIR: "{{.MODULE}}"
+          MODULE: "{{.MODULE}}"
       - task: bash
         vars:
-          DIR: "{{.MODULE}}"
-          RUN: go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
+          MODULE: "{{.MODULE}}"
+          RUN: GOTEST=1 go test -count=1 -v -cover ./... -run TestUnit.* |& tee test/report/unit.report.log
 
-  test-units:
+  tests-unit:
     cmds:
       - task: go-modules
         vars:
-          RUN: test-unit-module
+          RUN: test-unit
 
   test-integration:
-    dir: "{{.USER_WORKING_DIR}}"
-    cmds:
-      - task: test-clean
-      - task: bash
-        vars:
-          RUN: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
-
-  test-integration-module:
-    <<: *go-module
+    <<: *module
     cmds:
       - task: test-clean
         vars:
-          DIR: "{{.MODULE}}"
+          MODULE: "{{.MODULE}}"
       - task: bash
         vars:
-          DIR: "{{.MODULE}}"
-          RUN: go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
+          MODULE: "{{.MODULE}}"
+          RUN: GOTEST=1 go test -count=1 -race -v -cover ./... -run TestIntegration.* |& tee test/report/integration.report.log
 
-  test-integrations:
+  tests-integration:
     cmds:
       - task: go-modules
         vars:
-          RUN: test-integration-module
+          RUN: test-integration
 
   test-acceptance:
-    dir: "{{.USER_WORKING_DIR}}"
-    cmds:
-      - task: test-clean
-      - task: bash
-        vars:
-          RUN: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
-
-  test-acceptance-module:
-    <<: *go-module
+    <<: *module
     cmds:
       - task: test-clean
         vars:
-          DIR: "{{.MODULE}}"
+          MODULE: "{{.MODULE}}"
       - task: bash
         vars:
-          DIR: "{{.MODULE}}"
-          RUN: go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
+          MODULE: "{{.MODULE}}"
+          RUN: GOTEST=1 go test -count=1 -race -v -cover ./... -run TestAcceptance.* |& tee test/report/acceptance.report.log
 
-  test-acceptances:
+  tests-acceptance:
     cmds:
       - task: go-modules
         vars:
-          RUN: test-acceptance-module
+          RUN: test-acceptance
 
   test-flaky:
-    <<: *working-dir
+    <<: *module
     vars:
       RANDOM: "{{randIntN 10 | add 3}}"
       ITERATE: "{{.RANDOM | int | until}}"
     cmds:
+      - task: test-clean
+        vars:
+          MODULE: "{{.MODULE}}"
       - task: prompt-"Iterations \"{{.RANDOM}}\""
       - for: { var: ITERATE }
         cmd: echo "Iteration \"{{trimAll "[]" .ITEM | add1}}/{{.RANDOM}}\"" && task test-unit
-
-  test-flaky-module:
-    <<: *go-module
-    cmds:
-      - task: test-flaky
-        vars:
-          DIR: "{{.MODULE}}"
 
   tests-flaky:
     cmds:
       - task: go-modules
         vars:
-          RUN: test-flaky-module
+          RUN: test-flaky
 
-  tests-module:
-    <<: *go-module
+  test:
+    <<: *module
     cmds:
       - task: test-clean
         vars:
-          DIR: "{{.MODULE}}"
+          MODULE: "{{.MODULE}}"
       - task: bash
         vars:
-          DIR: "{{.MODULE}}"
+          MODULE: "{{.MODULE}}"
           RUN: go test -count=1 -race -v -cover ./... |& tee test/report/report.log
 
   tests:
     cmds:
+      - task: tests-flaky
       - task: go-modules
         vars:
-          RUN: tests-module
+          RUN: test
 
   # ---------------------------------------------------------------------------- #
   #                                     Build                                    #
@@ -713,10 +691,10 @@ tasks:
 
   fix-dev:
     cmds:
-      - task: upgrade-go
+      - task: upgrades-go
       - task: install-tools-dev
 
   fix-test:
     cmds:
-      - task: upgrade-go
+      - task: upgrades-go
       - task: install-tools-test
