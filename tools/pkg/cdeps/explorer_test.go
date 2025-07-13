@@ -6,13 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/cdeps"
+	"github.com/bastean/x/tools/pkg/errors"
 )
 
 type ExplorerTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT             *cdeps.Explorer
 	directory, file string
 	extensions      []string
@@ -43,13 +44,13 @@ func (s *ExplorerTestSuite) TestCreateDirectoryErrFailedCreation() {
 
 	actual := s.SUT.CreateDirectory(directory)
 
-	expected := fmt.Errorf("failed to create \"%s\"", directory)
+	expected := fmt.Errorf("failed to create %q [%s]", directory, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TestCopyFile() {
-	path, file, expected := cdeps.RandomFile(s.directory)
+	path, file, expected := cdeps.Mother().RandomFile(s.directory)
 
 	s.NoError(s.SUT.CopyFile(file, path, s.directory))
 
@@ -67,25 +68,25 @@ func (s *ExplorerTestSuite) TestCopyFile() {
 func (s *ExplorerTestSuite) TestCopyFileErrFailedReading() {
 	actual := s.SUT.CopyFile(s.file, s.directory, "./")
 
-	expected := fmt.Errorf("failed to read \"%s\" from \"%s\"", s.file, s.directory)
+	expected := fmt.Errorf("failed to read %q from %q [%s]", s.file, s.directory, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
-	path, file, _ := cdeps.RandomFile(s.directory)
+	path, file, _ := cdeps.Mother().RandomFile(s.directory)
 
-	directory := "undefined"
+	directory := cdeps.Mother().RandomUndefinedDir(s.directory)
 
 	actual := s.SUT.CopyFile(file, path, directory)
 
-	expected := fmt.Errorf("failed to write \"%s\" on \"%s\"", file, directory)
+	expected := fmt.Errorf("failed to write %q on %q [%s]", file, directory, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TestCopyDependency() {
-	path, files := cdeps.RandomFiles(s.directory, s.extensions)
+	path, files := cdeps.Mother().RandomFiles(s.directory, s.extensions)
 
 	for _, file := range files {
 		s.NoError(s.SUT.CopyDependency(file, path, s.directory))
@@ -102,7 +103,7 @@ func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
 		everyWoff2File = `^.+\.woff2$`
 	)
 
-	path, files := cdeps.RandomFiles(s.directory, s.extensions)
+	path, files := cdeps.Mother().RandomFiles(s.directory, s.extensions)
 
 	s.NoError(s.SUT.CopyDependency(everyMinFile, path, s.directory))
 
@@ -116,11 +117,11 @@ func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
 func (s *ExplorerTestSuite) TestCopyDependencyErrFailed() {
 	file := s.file
 
-	source := "undefined"
+	source := cdeps.Mother().RandomUndefinedFile(s.directory)
 
 	actual := s.SUT.CopyDependency(file, source, s.directory)
 
-	expected := fmt.Errorf("failed to copy \"%s\" from \"%s\"", file, source)
+	expected := fmt.Errorf("failed to copy %q from %q [%s]", file, source, errors.Extract(actual))
 
 	s.Equal(expected, actual)
 }

@@ -25,13 +25,13 @@ func Up(configFile string) error {
 	data, err := os.ReadFile(configFile) //nolint:gosec
 
 	if err != nil {
-		return fmt.Errorf("failure to read configuration file %q [%s]", configFile, err.Error())
+		return fmt.Errorf("failure to read configuration file %q [%s]", configFile, err)
 	}
 
 	err = json.Unmarshal(data, config)
 
 	if err != nil {
-		return fmt.Errorf("failure to decode configuration file %q [%s]", configFile, err.Error())
+		return fmt.Errorf("failure to decode configuration file %q [%s]", configFile, err)
 	}
 
 	var errInterpolation error

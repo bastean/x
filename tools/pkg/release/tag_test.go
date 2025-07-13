@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-
-	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/release"
 )
 
 type TagTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT  *release.Tag
 	doer *release.DoerMock
 }
@@ -26,9 +24,9 @@ func (s *TagTestSuite) SetupSuite() {
 }
 
 func (s *TagTestSuite) TestLatest() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
-	expected, _, _, _, _ := release.RandomTag(module)
+	expected, _, _, _, _ := release.Mother().RandomTag(module)
 
 	cmds := []string{"bash", "-c", fmt.Sprintf("git tag --sort -v:refname | grep %s | head -n 1", module.Name)}
 
@@ -44,13 +42,13 @@ func (s *TagTestSuite) TestLatest() {
 }
 
 func (s *TagTestSuite) TestCreate() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
-	_, version, _, _, _ := release.RandomTag(module)
+	_, version, _, _, _ := release.Mother().RandomTag(module)
 
 	annotate := "v" + version
 
-	message := services.Create.Message()
+	message := release.Mother().Message()
 
 	cmds := []string{"git", "tag", "-a", annotate, "-m", message}
 
@@ -62,9 +60,9 @@ func (s *TagTestSuite) TestCreate() {
 }
 
 func (s *TagTestSuite) TestCreateStd() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
-	_, version, _, _, _ := release.RandomTag(module)
+	_, version, _, _, _ := release.Mother().RandomTag(module)
 
 	annotate := fmt.Sprintf("%s/v%s", module.Name, version)
 

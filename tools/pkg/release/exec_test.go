@@ -4,13 +4,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/release"
 )
 
 type ExecTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT  release.Doer
 	file string
 }

@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/release"
 )
 
 type BumpTestSuite struct {
-	suite.Suite
+	suite.Default
 }
 
 func (s *BumpTestSuite) TestBumpVersionFirstRelease() {
-	module := release.RandomModuleFirstRelease()
+	module := release.Mother().RandomModuleFirstRelease()
 
 	latest := module.Name + "/v0.0.0"
 
@@ -29,9 +29,9 @@ func (s *BumpTestSuite) TestBumpVersionFirstRelease() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionRelease() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
-	latest, _, major, minor, patch := release.RandomTag(module)
+	latest, _, major, minor, patch := release.Mother().RandomTag(module)
 
 	switch module.Increment {
 	case "patch":
@@ -55,7 +55,7 @@ func (s *BumpTestSuite) TestBumpVersionRelease() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
 	latest := module.Name
 
@@ -69,7 +69,7 @@ func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidSemVer() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
 	latest := module.Name + "/v0"
 
@@ -83,9 +83,9 @@ func (s *BumpTestSuite) TestBumpVersionErrInvalidSemVer() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidIncrement() {
-	module, _ := release.ModuleWithInvalidIncrement()
+	module, _ := release.Mother().ModuleWithInvalidIncrement()
 
-	latest, _, _, _, _ := release.RandomTag(module)
+	latest, _, _, _, _ := release.Mother().RandomTag(module)
 
 	_, actual := release.BumpVersion(module, latest)
 

@@ -6,23 +6,20 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/errors"
 	"github.com/bastean/x/tools/pkg/syncenv"
 )
 
 type BackupTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT       *syncenv.Backup
 	directory string
 }
 
 func (s *BackupTestSuite) SetupSuite() {
-	s.Equal(syncenv.ExtBackup, ".syncenv.bak")
-
 	s.directory = "ignore"
-
 	s.SUT = new(syncenv.Backup)
 }
 
@@ -31,8 +28,12 @@ func (s *BackupTestSuite) SetupTest() {
 	s.NoError(os.MkdirAll(s.directory, 0700))
 }
 
+func (s *BackupTestSuite) TestSentinel() {
+	s.Equal(".syncenv.bak", syncenv.ExtBackup)
+}
+
 func (s *BackupTestSuite) TestCreate() {
-	source, file, expected := syncenv.RandomFile(s.directory)
+	source, file, expected := syncenv.Mother().RandomFile(s.directory)
 
 	s.NoError(s.SUT.Create(filepath.Join(source, file)))
 
@@ -48,7 +49,7 @@ func (s *BackupTestSuite) TestCreate() {
 }
 
 func (s *BackupTestSuite) TestCreateErrFailedReading() {
-	file := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomUndefinedFile(s.directory))
+	file := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomUndefinedFile(s.directory))
 
 	actual := s.SUT.Create(file)
 
@@ -58,7 +59,7 @@ func (s *BackupTestSuite) TestCreateErrFailedReading() {
 }
 
 func (s *BackupTestSuite) TestCreateErrFailedWriting() {
-	source, file, _ := syncenv.RandomFile(s.directory)
+	source, file, _ := syncenv.Mother().RandomFile(s.directory)
 
 	file = filepath.Join(source, file)
 
@@ -72,7 +73,7 @@ func (s *BackupTestSuite) TestCreateErrFailedWriting() {
 }
 
 func (s *BackupTestSuite) TestRestore() {
-	source, file, expected := syncenv.RandomFile(s.directory)
+	source, file, expected := syncenv.Mother().RandomFile(s.directory)
 
 	file = filepath.Join(source, file)
 
@@ -94,7 +95,7 @@ func (s *BackupTestSuite) TestRestore() {
 }
 
 func (s *BackupTestSuite) TestRestoreErrFailure() {
-	file := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomUndefinedFile(s.directory))
+	file := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomUndefinedFile(s.directory))
 
 	actual := s.SUT.Restore(file)
 
@@ -104,19 +105,21 @@ func (s *BackupTestSuite) TestRestoreErrFailure() {
 }
 
 func (s *BackupTestSuite) TestRemove() {
-	source, file, _ := syncenv.RandomFile(s.directory)
+	source, file, _ := syncenv.Mother().RandomFile(s.directory)
 
-	file = filepath.Join(source, file)
+	backup := filepath.Join(source, file)
 
-	s.NoError(s.SUT.Create(file))
+	s.NoError(s.SUT.Create(backup))
 
-	s.NoError(s.SUT.Remove(file))
+	s.NoError(s.SUT.Remove(backup))
 
-	s.NoFileExists(file + ".syncenv.bak")
+	backup = filepath.Join(source, file+".syncenv.bak")
+
+	s.NoFileExists(backup)
 }
 
 func (s *BackupTestSuite) TestRemoveErrFailure() {
-	backup := filepath.Join(syncenv.RandomUndefinedPath(s.directory), syncenv.RandomFilename())
+	backup := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomFilename())
 
 	actual := s.SUT.Remove(backup)
 
@@ -126,7 +129,6 @@ func (s *BackupTestSuite) TestRemoveErrFailure() {
 }
 
 func (s *BackupTestSuite) TearDownTest() {
-	s.NoError(os.Chmod(s.directory, 0700)) //nolint:gosec
 	s.NoError(os.RemoveAll(s.directory))
 }
 

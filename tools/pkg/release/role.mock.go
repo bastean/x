@@ -1,11 +1,11 @@
 package release
 
 import (
-	"github.com/stretchr/testify/mock"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/mock"
 )
 
 type DoerMock struct {
-	mock.Mock
+	mock.Default
 }
 
 func (m *DoerMock) Do(list ...string) (string, error) {

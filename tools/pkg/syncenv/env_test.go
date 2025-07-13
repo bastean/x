@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/errors"
 	"github.com/bastean/x/tools/pkg/syncenv"
 )
 
 type EnvTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT       *syncenv.Env
 	directory string
 }
@@ -30,23 +30,23 @@ func (s *EnvTestSuite) SetupTest() {
 }
 
 func (s *EnvTestSuite) TestDump() {
-	envs := syncenv.RandomEnvs()
+	envs := syncenv.Mother().RandomEnvs()
 
-	source, file := syncenv.RandomEnvFile(strings.Join(envs, ""), s.directory)
+	source, file := syncenv.Mother().RandomEnvFile(strings.Join(envs, ""), s.directory)
 
 	actual, err := s.SUT.Dump(filepath.Join(source, file))
 
-	expected := strings.Split(strings.Join(envs, ""), "\n")
-
 	s.NoError(err)
+
+	expected := strings.Split(strings.Join(envs, ""), "\n")
 
 	s.Equal(expected, actual)
 }
 
 func (s *EnvTestSuite) TestDumpErrFailedReading() {
-	file := syncenv.RandomUndefinedEnvFile(s.directory)
+	file := syncenv.Mother().RandomUndefinedFile(s.directory)
 
-	path := syncenv.RandomUndefinedEnvPath(s.directory)
+	path := syncenv.Mother().RandomUndefinedDir(s.directory)
 
 	source := filepath.Join(path, file)
 
@@ -58,17 +58,17 @@ func (s *EnvTestSuite) TestDumpErrFailedReading() {
 }
 
 func (s *EnvTestSuite) TestSync() {
-	templateEnvs := syncenv.RandomTemplateEnvs()
+	templateEnvs := syncenv.Mother().RandomTemplateEnvs()
 
-	templateSource, templateFile := syncenv.RandomEnvFile(strings.Join(templateEnvs, ""), s.directory)
+	templateSource, templateFile := syncenv.Mother().RandomEnvFile(strings.Join(templateEnvs, ""), s.directory)
 
 	templateEnvs, err := s.SUT.Dump(filepath.Join(templateSource, templateFile))
 
 	s.NoError(err)
 
-	targetEnvs := syncenv.RandomFileEnvs()
+	targetEnvs := syncenv.Mother().RandomFileEnvs()
 
-	targetSource, targetFile := syncenv.RandomEnvFile(strings.Join(targetEnvs, ""), s.directory)
+	targetSource, targetFile := syncenv.Mother().RandomEnvFile(strings.Join(targetEnvs, ""), s.directory)
 
 	target := filepath.Join(targetSource, targetFile)
 
@@ -86,9 +86,9 @@ func (s *EnvTestSuite) TestSync() {
 }
 
 func (s *EnvTestSuite) TestSyncErrOverwriting() {
-	templateEnvs := syncenv.EnvsWithEmptyValues()
+	templateEnvs := syncenv.Mother().EnvsWithEmptyValues()
 
-	targetSource, targetFile := syncenv.RandomEnvFile("", s.directory)
+	targetSource, targetFile := syncenv.Mother().RandomEnvFile("", s.directory)
 
 	target := filepath.Join(targetSource, targetFile)
 
@@ -102,7 +102,6 @@ func (s *EnvTestSuite) TestSyncErrOverwriting() {
 }
 
 func (s *EnvTestSuite) TearDownTest() {
-	s.NoError(os.Chmod(s.directory, 0700)) //nolint:gosec
 	s.NoError(os.RemoveAll(s.directory))
 }
 

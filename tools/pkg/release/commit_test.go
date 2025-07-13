@@ -3,15 +3,13 @@ package release_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-
-	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services"
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/release"
 )
 
 type CommitTestSuite struct {
-	suite.Suite
+	suite.Default
 	SUT  *release.Commit
 	doer *release.DoerMock
 }
@@ -25,7 +23,7 @@ func (s *CommitTestSuite) SetupSuite() {
 }
 
 func (s *CommitTestSuite) TestCreate() {
-	message := services.Create.Message()
+	message := release.Mother().Message()
 
 	cmds := []string{"git", "commit", "--allow-empty", "-m", message}
 
@@ -37,9 +35,9 @@ func (s *CommitTestSuite) TestCreate() {
 }
 
 func (s *CommitTestSuite) TestCreateStd() {
-	module := release.RandomModuleRelease()
+	module := release.Mother().RandomModuleRelease()
 
-	latest, version, _, _, _ := release.RandomTag(module)
+	latest, version, _, _, _ := release.Mother().RandomTag(module)
 
 	message := "chore(release): " + latest
 

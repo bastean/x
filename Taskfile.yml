@@ -484,7 +484,7 @@ tasks:
       - task: bash
         vars:
           MODULE: "{{.MODULE}}"
-          RUN: go test -count=1 -race -v -cover ./... |& tee test/report/report.log
+          RUN: GOTEST=1 go test -count=1 -race -v -cover ./... |& tee test/report/report.log
 
   tests:
     cmds:
