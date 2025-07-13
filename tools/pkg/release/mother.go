@@ -13,7 +13,7 @@ type m struct {
 	*mother.Mother
 }
 
-func (m *m) RandomModuleRelease() *Module {
+func (m *m) ModuleReleaseValid() *Module {
 	module, err := NewModuleRelease(
 		m.LoremIpsumWord(),
 		m.RandomString([]string{"patch", "minor", "major"}),
@@ -26,7 +26,7 @@ func (m *m) RandomModuleRelease() *Module {
 	return module
 }
 
-func (m *m) RandomModuleFirstRelease() *Module {
+func (m *m) ModuleFirstReleaseValid() *Module {
 	module, err := NewModuleFirstRelease(
 		m.LoremIpsumWord(),
 	)
@@ -38,18 +38,18 @@ func (m *m) RandomModuleFirstRelease() *Module {
 	return module
 }
 
-func (m *m) ModuleWithInvalidIncrement() (*Module, string) {
+func (m *m) ModuleInvalidIncrement() (*Module, string) {
 	value := "x"
 
-	module := m.RandomModuleRelease()
+	module := m.ModuleReleaseValid()
 
 	module.Increment = value
 
 	return module, value
 }
 
-func (m *m) RandomTag(module *Module) (string, string, int, int, int) {
-	version := m.AppVersion()
+func (m *m) TagValid(module *Module) (latest string, version string, major int, minor int, patch int) {
+	version = m.AppVersion()
 
 	semver := strings.Split(version, ".")
 

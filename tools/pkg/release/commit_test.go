@@ -35,9 +35,9 @@ func (s *CommitTestSuite) TestCreate() {
 }
 
 func (s *CommitTestSuite) TestCreateStd() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
-	latest, version, _, _, _ := release.Mother().RandomTag(module)
+	latest, version, _, _, _ := release.Mother().TagValid(module)
 
 	message := "chore(release): " + latest
 

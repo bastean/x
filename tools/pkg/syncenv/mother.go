@@ -11,7 +11,7 @@ type m struct {
 	*mother.Mother
 }
 
-func (m *m) RandomFile(path string) (string, string, []byte) {
+func (m *m) FileValid(path string) (string, string, []byte) {
 	file := m.LoremIpsumWord()
 
 	content := []byte(m.Message())
@@ -25,19 +25,19 @@ func (m *m) RandomFile(path string) (string, string, []byte) {
 	return path, file, content
 }
 
-func (m *m) RandomFilename() string {
+func (m *m) FilenameValid() string {
 	return m.LoremIpsumWord()
 }
 
-func (m *m) RandomUndefinedFile(path string) string {
+func (m *m) FileInvalid(path string) string {
 	return filepath.Join(path, m.LoremIpsumWord())
 }
 
-func (m *m) RandomUndefinedDir(path string) string {
+func (m *m) DirectoryInvalid(path string) string {
 	return filepath.Join(path, m.LoremIpsumWord())
 }
 
-func (m *m) RandomEnvValues(isTemplate bool) []string {
+func (m *m) EnvValuesValid(isTemplate bool) []string {
 	var key, value string
 
 	envs := make([]string, 0, 12)
@@ -63,23 +63,23 @@ func (m *m) RandomEnvValues(isTemplate bool) []string {
 	return envs
 }
 
-func (m *m) RandomEnvs() []string {
-	return m.RandomEnvValues(m.Bool())
+func (m *m) EnvsValuesValid() []string {
+	return m.EnvValuesValid(m.Bool())
 }
 
-func (m *m) RandomTemplateEnvs() []string {
-	return m.RandomEnvValues(true)
+func (m *m) EnvsValuesTemplateValid() []string {
+	return m.EnvValuesValid(true)
 }
 
-func (m *m) RandomFileEnvs() []string {
-	return m.RandomEnvValues(false)
+func (m *m) EnvsValuesFileValid() []string {
+	return m.EnvValuesValid(false)
 }
 
-func (m *m) EnvsWithEmptyValues() []string {
+func (m *m) EnvsValuesInvalid() []string {
 	return []string{}
 }
 
-func (m *m) RandomEnvFile(envs, path string) (string, string) {
+func (m *m) EnvFileValid(envs, path string) (string, string) {
 	file := m.LoremIpsumWord()
 
 	err := os.WriteFile(filepath.Join(path, file), []byte(envs), 0600)

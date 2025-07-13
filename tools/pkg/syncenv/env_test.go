@@ -30,9 +30,9 @@ func (s *EnvTestSuite) SetupTest() {
 }
 
 func (s *EnvTestSuite) TestDump() {
-	envs := syncenv.Mother().RandomEnvs()
+	envs := syncenv.Mother().EnvsValuesValid()
 
-	source, file := syncenv.Mother().RandomEnvFile(strings.Join(envs, ""), s.directory)
+	source, file := syncenv.Mother().EnvFileValid(strings.Join(envs, ""), s.directory)
 
 	actual, err := s.SUT.Dump(filepath.Join(source, file))
 
@@ -44,9 +44,9 @@ func (s *EnvTestSuite) TestDump() {
 }
 
 func (s *EnvTestSuite) TestDumpErrFailedReading() {
-	file := syncenv.Mother().RandomUndefinedFile(s.directory)
+	file := syncenv.Mother().FileInvalid(s.directory)
 
-	path := syncenv.Mother().RandomUndefinedDir(s.directory)
+	path := syncenv.Mother().DirectoryInvalid(s.directory)
 
 	source := filepath.Join(path, file)
 
@@ -58,17 +58,17 @@ func (s *EnvTestSuite) TestDumpErrFailedReading() {
 }
 
 func (s *EnvTestSuite) TestSync() {
-	templateEnvs := syncenv.Mother().RandomTemplateEnvs()
+	templateEnvs := syncenv.Mother().EnvsValuesTemplateValid()
 
-	templateSource, templateFile := syncenv.Mother().RandomEnvFile(strings.Join(templateEnvs, ""), s.directory)
+	templateSource, templateFile := syncenv.Mother().EnvFileValid(strings.Join(templateEnvs, ""), s.directory)
 
 	templateEnvs, err := s.SUT.Dump(filepath.Join(templateSource, templateFile))
 
 	s.NoError(err)
 
-	targetEnvs := syncenv.Mother().RandomFileEnvs()
+	targetEnvs := syncenv.Mother().EnvsValuesFileValid()
 
-	targetSource, targetFile := syncenv.Mother().RandomEnvFile(strings.Join(targetEnvs, ""), s.directory)
+	targetSource, targetFile := syncenv.Mother().EnvFileValid(strings.Join(targetEnvs, ""), s.directory)
 
 	target := filepath.Join(targetSource, targetFile)
 
@@ -86,9 +86,9 @@ func (s *EnvTestSuite) TestSync() {
 }
 
 func (s *EnvTestSuite) TestSyncErrOverwriting() {
-	templateEnvs := syncenv.Mother().EnvsWithEmptyValues()
+	templateEnvs := syncenv.Mother().EnvsValuesInvalid()
 
-	targetSource, targetFile := syncenv.Mother().RandomEnvFile("", s.directory)
+	targetSource, targetFile := syncenv.Mother().EnvFileValid("", s.directory)
 
 	target := filepath.Join(targetSource, targetFile)
 

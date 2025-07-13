@@ -33,7 +33,7 @@ func (s *BackupTestSuite) TestSentinel() {
 }
 
 func (s *BackupTestSuite) TestCreate() {
-	source, file, expected := syncenv.Mother().RandomFile(s.directory)
+	source, file, expected := syncenv.Mother().FileValid(s.directory)
 
 	s.NoError(s.SUT.Create(filepath.Join(source, file)))
 
@@ -49,7 +49,7 @@ func (s *BackupTestSuite) TestCreate() {
 }
 
 func (s *BackupTestSuite) TestCreateErrFailedReading() {
-	file := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomUndefinedFile(s.directory))
+	file := syncenv.Mother().FileInvalid(s.directory)
 
 	actual := s.SUT.Create(file)
 
@@ -59,7 +59,7 @@ func (s *BackupTestSuite) TestCreateErrFailedReading() {
 }
 
 func (s *BackupTestSuite) TestCreateErrFailedWriting() {
-	source, file, _ := syncenv.Mother().RandomFile(s.directory)
+	source, file, _ := syncenv.Mother().FileValid(s.directory)
 
 	file = filepath.Join(source, file)
 
@@ -73,7 +73,7 @@ func (s *BackupTestSuite) TestCreateErrFailedWriting() {
 }
 
 func (s *BackupTestSuite) TestRestore() {
-	source, file, expected := syncenv.Mother().RandomFile(s.directory)
+	source, file, expected := syncenv.Mother().FileValid(s.directory)
 
 	file = filepath.Join(source, file)
 
@@ -95,7 +95,7 @@ func (s *BackupTestSuite) TestRestore() {
 }
 
 func (s *BackupTestSuite) TestRestoreErrFailure() {
-	file := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomUndefinedFile(s.directory))
+	file := syncenv.Mother().FileInvalid(s.directory)
 
 	actual := s.SUT.Restore(file)
 
@@ -105,7 +105,7 @@ func (s *BackupTestSuite) TestRestoreErrFailure() {
 }
 
 func (s *BackupTestSuite) TestRemove() {
-	source, file, _ := syncenv.Mother().RandomFile(s.directory)
+	source, file, _ := syncenv.Mother().FileValid(s.directory)
 
 	backup := filepath.Join(source, file)
 
@@ -119,7 +119,7 @@ func (s *BackupTestSuite) TestRemove() {
 }
 
 func (s *BackupTestSuite) TestRemoveErrFailure() {
-	backup := filepath.Join(syncenv.Mother().RandomUndefinedDir(s.directory), syncenv.Mother().RandomFilename())
+	backup := filepath.Join(syncenv.Mother().DirectoryInvalid(s.directory), syncenv.Mother().FilenameValid())
 
 	actual := s.SUT.Remove(backup)
 

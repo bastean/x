@@ -50,7 +50,7 @@ func (s *ExplorerTestSuite) TestCreateDirectoryErrFailedCreation() {
 }
 
 func (s *ExplorerTestSuite) TestCopyFile() {
-	path, file, expected := cdeps.Mother().RandomFile(s.directory)
+	path, file, expected := cdeps.Mother().FileValid(s.directory)
 
 	s.NoError(s.SUT.CopyFile(file, path, s.directory))
 
@@ -74,9 +74,9 @@ func (s *ExplorerTestSuite) TestCopyFileErrFailedReading() {
 }
 
 func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
-	path, file, _ := cdeps.Mother().RandomFile(s.directory)
+	path, file, _ := cdeps.Mother().FileValid(s.directory)
 
-	directory := cdeps.Mother().RandomUndefinedDir(s.directory)
+	directory := cdeps.Mother().DirectoryInvalid(s.directory)
 
 	actual := s.SUT.CopyFile(file, path, directory)
 
@@ -86,7 +86,7 @@ func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
 }
 
 func (s *ExplorerTestSuite) TestCopyDependency() {
-	path, files := cdeps.Mother().RandomFiles(s.directory, s.extensions)
+	path, files := cdeps.Mother().FilesValid(s.directory, s.extensions)
 
 	for _, file := range files {
 		s.NoError(s.SUT.CopyDependency(file, path, s.directory))
@@ -103,7 +103,7 @@ func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
 		everyWoff2File = `^.+\.woff2$`
 	)
 
-	path, files := cdeps.Mother().RandomFiles(s.directory, s.extensions)
+	path, files := cdeps.Mother().FilesValid(s.directory, s.extensions)
 
 	s.NoError(s.SUT.CopyDependency(everyMinFile, path, s.directory))
 
@@ -117,7 +117,7 @@ func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
 func (s *ExplorerTestSuite) TestCopyDependencyErrFailed() {
 	file := s.file
 
-	source := cdeps.Mother().RandomUndefinedFile(s.directory)
+	source := cdeps.Mother().FileInvalid(s.directory)
 
 	actual := s.SUT.CopyDependency(file, source, s.directory)
 

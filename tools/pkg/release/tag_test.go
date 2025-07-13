@@ -24,9 +24,9 @@ func (s *TagTestSuite) SetupSuite() {
 }
 
 func (s *TagTestSuite) TestLatest() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
-	expected, _, _, _, _ := release.Mother().RandomTag(module)
+	expected, _, _, _, _ := release.Mother().TagValid(module)
 
 	cmds := []string{"bash", "-c", fmt.Sprintf("git tag --sort -v:refname | grep %s | head -n 1", module.Name)}
 
@@ -42,9 +42,9 @@ func (s *TagTestSuite) TestLatest() {
 }
 
 func (s *TagTestSuite) TestCreate() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
-	_, version, _, _, _ := release.Mother().RandomTag(module)
+	_, version, _, _, _ := release.Mother().TagValid(module)
 
 	annotate := "v" + version
 
@@ -60,9 +60,9 @@ func (s *TagTestSuite) TestCreate() {
 }
 
 func (s *TagTestSuite) TestCreateStd() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
-	_, version, _, _, _ := release.Mother().RandomTag(module)
+	_, version, _, _, _ := release.Mother().TagValid(module)
 
 	annotate := fmt.Sprintf("%s/v%s", module.Name, version)
 

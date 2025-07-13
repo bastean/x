@@ -11,7 +11,7 @@ type m struct {
 	*mother.Mother
 }
 
-func (m *m) RandomFile(path string) (string, string, []byte) {
+func (m *m) FileValid(path string) (string, string, []byte) {
 	path += "/random"
 
 	err := os.MkdirAll(path, 0700)
@@ -33,7 +33,7 @@ func (m *m) RandomFile(path string) (string, string, []byte) {
 	return path, file, content
 }
 
-func (m *m) RandomFiles(path string, extensions []string) (string, []string) {
+func (m *m) FilesValid(path string, extensions []string) (string, []string) {
 	path += "/random"
 
 	err := os.MkdirAll(path, 0700)
@@ -57,11 +57,11 @@ func (m *m) RandomFiles(path string, extensions []string) (string, []string) {
 	return path, files
 }
 
-func (m *m) RandomUndefinedFile(path string) string {
+func (m *m) FileInvalid(path string) string {
 	return filepath.Join(path, m.LoremIpsumWord())
 }
 
-func (m *m) RandomUndefinedDir(path string) string {
+func (m *m) DirectoryInvalid(path string) string {
 	return filepath.Join(path, m.LoremIpsumWord())
 }
 

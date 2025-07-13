@@ -15,7 +15,7 @@ type BumpTestSuite struct {
 }
 
 func (s *BumpTestSuite) TestBumpVersionFirstRelease() {
-	module := release.Mother().RandomModuleFirstRelease()
+	module := release.Mother().ModuleFirstReleaseValid()
 
 	latest := module.Name + "/v0.0.0"
 
@@ -29,9 +29,9 @@ func (s *BumpTestSuite) TestBumpVersionFirstRelease() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionRelease() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
-	latest, _, major, minor, patch := release.Mother().RandomTag(module)
+	latest, _, major, minor, patch := release.Mother().TagValid(module)
 
 	switch module.Increment {
 	case "patch":
@@ -55,7 +55,7 @@ func (s *BumpTestSuite) TestBumpVersionRelease() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
 	latest := module.Name
 
@@ -69,7 +69,7 @@ func (s *BumpTestSuite) TestBumpVersionErrInvalidVersion() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidSemVer() {
-	module := release.Mother().RandomModuleRelease()
+	module := release.Mother().ModuleReleaseValid()
 
 	latest := module.Name + "/v0"
 
@@ -83,9 +83,9 @@ func (s *BumpTestSuite) TestBumpVersionErrInvalidSemVer() {
 }
 
 func (s *BumpTestSuite) TestBumpVersionErrInvalidIncrement() {
-	module, _ := release.Mother().ModuleWithInvalidIncrement()
+	module, _ := release.Mother().ModuleInvalidIncrement()
 
-	latest, _, _, _, _ := release.Mother().RandomTag(module)
+	latest, _, _, _, _ := release.Mother().TagValid(module)
 
 	_, actual := release.BumpVersion(module, latest)
 
