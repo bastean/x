@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/embed"
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
 	"github.com/bastean/x/tools/pkg/cdeps"
-	"github.com/bastean/x/tools/pkg/errors"
 )
 
 type ExplorerTestSuite struct {
@@ -44,7 +44,7 @@ func (s *ExplorerTestSuite) TestCreateDirectoryErrFailedCreation() {
 
 	actual := s.SUT.CreateDirectory(directory)
 
-	expected := fmt.Errorf("failed to create %q [%s]", directory, errors.Extract(actual))
+	expected := fmt.Errorf("failed to create %q [%s]", directory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -68,7 +68,7 @@ func (s *ExplorerTestSuite) TestCopyFile() {
 func (s *ExplorerTestSuite) TestCopyFileErrFailedReading() {
 	actual := s.SUT.CopyFile(s.file, s.directory, "./")
 
-	expected := fmt.Errorf("failed to read %q from %q [%s]", s.file, s.directory, errors.Extract(actual))
+	expected := fmt.Errorf("failed to read %q from %q [%s]", s.file, s.directory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -80,7 +80,7 @@ func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
 
 	actual := s.SUT.CopyFile(file, path, directory)
 
-	expected := fmt.Errorf("failed to write %q on %q [%s]", file, directory, errors.Extract(actual))
+	expected := fmt.Errorf("failed to write %q on %q [%s]", file, directory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -121,7 +121,7 @@ func (s *ExplorerTestSuite) TestCopyDependencyErrFailed() {
 
 	actual := s.SUT.CopyDependency(file, source, s.directory)
 
-	expected := fmt.Errorf("failed to copy %q from %q [%s]", file, source, errors.Extract(actual))
+	expected := fmt.Errorf("failed to copy %q from %q [%s]", file, source, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }

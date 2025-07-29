@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/embed"
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
-	"github.com/bastean/x/tools/pkg/errors"
 	"github.com/bastean/x/tools/pkg/syncenv"
 )
 
@@ -53,7 +53,7 @@ func (s *BackupTestSuite) TestCreateErrFailedReading() {
 
 	actual := s.SUT.Create(file)
 
-	expected := fmt.Errorf("failed to read %q [%s]", file, errors.Extract(actual))
+	expected := fmt.Errorf("failed to read %q [%s]", file, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -67,7 +67,7 @@ func (s *BackupTestSuite) TestCreateErrFailedWriting() {
 
 	actual := s.SUT.Create(file)
 
-	expected := fmt.Errorf("failed to write %q [%s]", file+".syncenv.bak", errors.Extract(actual))
+	expected := fmt.Errorf("failed to write %q [%s]", file+".syncenv.bak", embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -99,7 +99,7 @@ func (s *BackupTestSuite) TestRestoreErrFailure() {
 
 	actual := s.SUT.Restore(file)
 
-	expected := fmt.Errorf("failure to restore file %q [%s]", file, errors.Extract(actual))
+	expected := fmt.Errorf("failure to restore file %q [%s]", file, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -123,7 +123,7 @@ func (s *BackupTestSuite) TestRemoveErrFailure() {
 
 	actual := s.SUT.Remove(backup)
 
-	expected := fmt.Errorf("failure to remove backup %q [%s]", backup+".syncenv.bak", errors.Extract(actual))
+	expected := fmt.Errorf("failure to remove backup %q [%s]", backup+".syncenv.bak", embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }

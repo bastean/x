@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/embed"
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
 
-	"github.com/bastean/x/tools/pkg/errors"
 	"github.com/bastean/x/tools/pkg/syncenv"
 )
 
@@ -52,7 +52,7 @@ func (s *EnvTestSuite) TestDumpErrFailedReading() {
 
 	_, actual := s.SUT.Dump(source)
 
-	expected := fmt.Errorf("failed to read %q [%s]", source, errors.Extract(actual))
+	expected := fmt.Errorf("failed to read %q [%s]", source, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
@@ -96,7 +96,7 @@ func (s *EnvTestSuite) TestSyncErrOverwriting() {
 
 	actual := s.SUT.Sync(templateEnvs, target)
 
-	expected := fmt.Errorf("failure to overwrite %q [%s]", target, errors.Extract(actual))
+	expected := fmt.Errorf("failure to overwrite %q [%s]", target, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
