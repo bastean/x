@@ -1,5 +1,5 @@
-github.com/bastean/codexgo/v4 v4.16.1 h1:Sva2iyAdTFXW9agGbJDeuRTOJuZdWqsQBcYDN5B4FlU=
-github.com/bastean/codexgo/v4 v4.16.1/go.mod h1:1QyELY0vJiCkrO0JUOOwOQJnTk6Lb4+w+2/N/TIwRfs=
+github.com/bastean/codexgo/v4 v4.16.2 h1:hvVvGFsZ71fkwK4nabFolUMIw/hplYvYtBi53Iwz+QA=
+github.com/bastean/codexgo/v4 v4.16.2/go.mod h1:GF0YeRN8EPhLYD5TmgIOm0rOa8oV/mL4fl+BqS1+dHE=
 github.com/brianvoe/gofakeit/v7 v7.3.0 h1:TWStf7/lLpAjKw+bqwzeORo9jvrxToWEwp9b1J2vApQ=
 github.com/brianvoe/gofakeit/v7 v7.3.0/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
