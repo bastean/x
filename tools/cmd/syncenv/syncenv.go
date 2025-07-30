@@ -2,37 +2,25 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/bastean/x/tools/internal/app/syncenv"
-)
-
-const (
-	cli = "syncenv"
+	"github.com/bastean/x/tools/internal/pkg/cli"
+	"github.com/bastean/x/tools/internal/pkg/errs"
 )
 
 var (
 	template, envs string
 )
 
-func usage() {
-	fmt.Printf("Usage: %s [flags]\n\n", cli)
-	flag.PrintDefaults()
-}
-
-func fatal(what string) {
-	fmt.Printf("%s\n", what)
-	os.Exit(1)
-}
-
 func main() {
 	flag.StringVar(&template, "t", "", "Path to \".env\" file template (required)")
 
 	flag.StringVar(&envs, "e", "", "Path to \".env\" files directory (required)")
 
-	flag.Usage = usage
+	flag.Usage = func() {
+		cli.Usage("syncenv")
+	}
 
 	flag.Parse()
 
@@ -41,13 +29,13 @@ func main() {
 
 		println()
 
-		fatal("Please define required flags")
+		errs.Fatal("Please define required flags")
 	}
 
 	log.Println("Starting synchronization...")
 
 	if err := syncenv.Up(template, envs); err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	log.Println("Synchronization completed!")

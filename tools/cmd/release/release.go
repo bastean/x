@@ -3,13 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 
+	"github.com/bastean/x/tools/internal/pkg/cli"
+	"github.com/bastean/x/tools/internal/pkg/errs"
 	"github.com/bastean/x/tools/pkg/release"
-)
-
-const (
-	cli = "release"
 )
 
 var (
@@ -19,16 +16,6 @@ var (
 	isFirstRelease bool
 )
 
-func usage() {
-	fmt.Printf("Usage: %s [flags]\n\n", cli)
-	flag.PrintDefaults()
-}
-
-func fatal(what string) {
-	fmt.Printf("Error: %s\n", what)
-	os.Exit(1)
-}
-
 func main() {
 	flag.StringVar(&name, "m", "", "Module name (required)")
 
@@ -36,7 +23,9 @@ func main() {
 
 	flag.BoolVar(&isFirstRelease, "f", false, "First Release (default: false)")
 
-	flag.Usage = usage
+	flag.Usage = func() {
+		cli.Usage("release")
+	}
 
 	flag.Parse()
 
@@ -45,7 +34,7 @@ func main() {
 
 		println()
 
-		fatal("define required flags")
+		errs.Fatal("define required flags")
 	}
 
 	var module *release.Module
@@ -58,7 +47,7 @@ func main() {
 	}
 
 	if err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	exec := new(release.Exec)
@@ -70,13 +59,13 @@ func main() {
 	latest, err := tag.Latest(module)
 
 	if err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	version, err := release.BumpVersion(module, latest)
 
 	if err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	commit := &release.Commit{
@@ -86,17 +75,17 @@ func main() {
 	err = commit.CreateStd(module, version)
 
 	if err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	err = tag.CreateStd(module, version)
 
 	if err != nil {
 		if errReset := commit.Reset(); errReset != nil {
-			fatal(fmt.Sprintf("\n\n%s\n%s", errReset.Error(), err.Error()))
+			errs.Fatal(fmt.Sprintf("\n\n%s\n%s", errReset.Error(), err.Error()))
 		}
 
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	fmt.Printf("Successfully released \"%s %s\"\n", module.Name, version)

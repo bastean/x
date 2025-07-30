@@ -2,35 +2,23 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/bastean/x/tools/internal/app/cdeps"
-)
-
-const (
-	cli = "cdeps"
+	"github.com/bastean/x/tools/internal/pkg/cli"
+	"github.com/bastean/x/tools/internal/pkg/errs"
 )
 
 var (
 	configFile string
 )
 
-func usage() {
-	fmt.Printf("Usage: %s [flags]\n\n", cli)
-	flag.PrintDefaults()
-}
-
-func fatal(what string) {
-	fmt.Printf("%s\n", what)
-	os.Exit(1)
-}
-
 func main() {
 	flag.StringVar(&configFile, "c", "cdeps.json", "cDeps configuration file (required)")
 
-	flag.Usage = usage
+	flag.Usage = func() {
+		cli.Usage("cdeps")
+	}
 
 	flag.Parse()
 
@@ -39,13 +27,13 @@ func main() {
 
 		println()
 
-		fatal("define required flags")
+		errs.Fatal("define required flags")
 	}
 
 	log.Println("Starting...")
 
 	if err := cdeps.Up(configFile); err != nil {
-		fatal(err.Error())
+		errs.Fatal(err.Error())
 	}
 
 	log.Println("Completed!")
