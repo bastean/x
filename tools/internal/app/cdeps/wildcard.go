@@ -7,12 +7,16 @@ import (
 	"strings"
 )
 
+const (
+	RExWildcard = `{[^{}]+}`
+)
+
 var (
-	reWildcard = regexp.MustCompile(`{[^{]+}`)
+	RExWildcardDo = regexp.MustCompile(RExWildcard)
 )
 
 func HasWildcard(text string) bool {
-	return reWildcard.MatchString(text)
+	return RExWildcardDo.MatchString(text)
 }
 
 func Interpolate(text string, wildcards map[string]string) (string, error) {
@@ -22,7 +26,7 @@ func Interpolate(text string, wildcards map[string]string) (string, error) {
 		err        error
 	)
 
-	value = reWildcard.ReplaceAllStringFunc(text, func(wildcard string) string {
+	value = RExWildcardDo.ReplaceAllStringFunc(text, func(wildcard string) string {
 		key = strings.Trim(wildcard, "{}")
 
 		if value, ok = wildcards[key]; !ok {

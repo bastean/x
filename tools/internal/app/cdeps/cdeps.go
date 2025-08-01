@@ -3,10 +3,18 @@ package cdeps
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/bastean/x/tools/internal/pkg/cli"
+	"github.com/bastean/x/tools/internal/pkg/errs"
 	"github.com/bastean/x/tools/pkg/cdeps"
+)
+
+var (
+	configFile string
 )
 
 type Dependency struct {
@@ -19,7 +27,35 @@ type Configuration struct {
 	Dependencies []*Dependency
 }
 
-func Up(configFile string) error {
+func Init() error {
+	flag.StringVar(&configFile, "c", "cdeps.json", "cDeps configuration file (required)")
+
+	flag.Usage = func() {
+		cli.Usage("cdeps")
+	}
+
+	flag.Parse()
+
+	if flag.NFlag() < 1 {
+		flag.Usage()
+
+		println()
+
+		return errs.ErrRequiredFlags
+	}
+
+	return nil
+}
+
+func Up() error {
+	err := Init()
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("Starting...")
+
 	config := new(Configuration)
 
 	data, err := os.ReadFile(configFile) //nolint:gosec
@@ -77,6 +113,8 @@ func Up(configFile string) error {
 			}
 		}
 	}
+
+	log.Println("Completed!")
 
 	return nil
 }
