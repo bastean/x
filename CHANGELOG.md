@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.8.0](https://github.com/bastean/x/compare/v0.7.0...v0.8.0) (2025-08-03)
+
+### Chores
+
+- **deps:** upgrade ([63f5c22](https://github.com/bastean/x/commit/63f5c22ab930504be84835dd82405e6ebcb3e34e))
+- **deps:** upgrade ([ebb4203](https://github.com/bastean/x/commit/ebb4203d19bfcf2b4565ca114d166b80a081127c))
+- **release:** tools/v0.4.0 ([9e20153](https://github.com/bastean/x/commit/9e2015325cfb446c78ecf4425f54a5c9066d80c1))
+- **task:** detect flaky tests ([d78a369](https://github.com/bastean/x/commit/d78a369cadf2b312f22fda3055f2c30f69059e58))
+- **task:** unify module tasks ([4638791](https://github.com/bastean/x/commit/46387916a34ec6ffed3bf0b11cb0abcbb5efe7d6))
+- **vscode:** add snippets ([c8744b1](https://github.com/bastean/x/commit/c8744b1bcc4c76c5a8de0505dd43bd78f9c8a031))
+- **vscode:** update settings ([02855e1](https://github.com/bastean/x/commit/02855e17265952cd03d941afbaa2b3b2d38bf094))
+
+### Continuous Integration
+
+- **github:** cache node modules ([82206f9](https://github.com/bastean/x/commit/82206f95962c4599cca3432aafbde0d7837eec47))
+
+### New Features
+
+- **tools:** add internal log package ([230bd2f](https://github.com/bastean/x/commit/230bd2f88b2b57aa87693c0f29b5cae34f7b0a58))
+
+### Refactors
+
+- **cdeps:** move main logic to internal app package ([e9094be](https://github.com/bastean/x/commit/e9094be8798e627871be54a2846d7eedb4af3c7a))
+- **release:** move main logic to internal app package ([a4502eb](https://github.com/bastean/x/commit/a4502eb316228af367ef66695eeb1a0bee66eb19))
+- **syncenv:** move main logic to internal app package ([c5eced0](https://github.com/bastean/x/commit/c5eced051f7a7bb52e59a13825009560f90a9016))
+- **tools:** add internal pkg to avoid duplication ([0a4888e](https://github.com/bastean/x/commit/0a4888e2df4ec7bef7237c24f2d4e0db084e34d2))
+- **tools:** remove errors package ([91e542b](https://github.com/bastean/x/commit/91e542b603ed84350bdb10738087fad83e515b08))
+
+### Tests
+
+- **acceptance:** add test suite to apps ([b14212c](https://github.com/bastean/x/commit/b14212c0602f048af65fb460c8acdf5891b4f6a4))
+- rename mother methods ([265d3b8](https://github.com/bastean/x/commit/265d3b8ffd5f77ae15702e14b97d528d14f7c59f))
+- use mother only in a test environment ([3c9ef0e](https://github.com/bastean/x/commit/3c9ef0e427211a2e36de848d568c1a030f72fabb))
+
 ## [0.7.0](https://github.com/bastean/x/compare/v0.6.0...v0.7.0) (2025-04-11)
 
 ### Chores
