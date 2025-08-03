@@ -1,9 +1,7 @@
 package cdeps
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -34,35 +32,56 @@ func (*Explorer) CopyFile(file, source, target string) error {
 		return fmt.Errorf("failed to write %q on %q [%s]", file, target, err)
 	}
 
-	log.Printf("Created: %q", filepath.Join(target, file))
-
 	return nil
 }
 
-func (e *Explorer) CopyDependency(dependency string, source, target string) error {
+func (e *Explorer) totalDependencies(files []os.DirEntry, isDependency func(string) bool) int {
+	total := 0
+
+	for _, file := range files {
+		if isDependency(file.Name()) {
+			total++
+		}
+	}
+
+	return total
+}
+
+func (e *Explorer) CopyDependency(dependency string, source, target string) ([]string, error) {
 	files, err := os.ReadDir(source)
 
 	if err != nil {
-		return fmt.Errorf("failed to copy %q from %q [%s]", dependency, source, err)
+		return nil, fmt.Errorf("failed to copy %q from %q [%s]", dependency, source, err)
 	}
 
 	err = e.CreateDirectory(target)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	isDependency := regexp.MustCompile(dependency).MatchString
 
+	var (
+		filename string
+		copies   = make([]string, 0, e.totalDependencies(files, isDependency))
+	)
+
 	for _, file := range files {
-		if isDependency(file.Name()) {
-			err = errors.Join(err, e.CopyFile(file.Name(), source, target))
+		filename = file.Name()
+
+		if !isDependency(filename) {
+			continue
 		}
+
+		err = e.CopyFile(filename, source, target)
+
+		if err != nil {
+			return nil, err
+		}
+
+		copies = append(copies, filepath.Join(target, filename))
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return copies, nil
 }

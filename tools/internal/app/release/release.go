@@ -3,11 +3,15 @@ package release
 import (
 	"flag"
 	"fmt"
-	"log"
 
 	"github.com/bastean/x/tools/internal/pkg/cli"
 	"github.com/bastean/x/tools/internal/pkg/errs"
+	"github.com/bastean/x/tools/internal/pkg/log"
 	"github.com/bastean/x/tools/pkg/release"
+)
+
+const (
+	App = "Release"
 )
 
 var (
@@ -24,7 +28,7 @@ func Init() error {
 	flag.BoolVar(&isFirstRelease, "f", false, "First Release (default: false)")
 
 	flag.Usage = func() {
-		cli.Usage("release")
+		cli.Usage(App)
 	}
 
 	flag.Parse()
@@ -47,7 +51,9 @@ func Up() error {
 		return err
 	}
 
-	log.Println("Starting...")
+	log.Logo(App)
+
+	log.Starting()
 
 	var module *release.Module
 
@@ -100,9 +106,9 @@ func Up() error {
 		return err
 	}
 
-	fmt.Printf("Successfully released \"%s %s\"\n", module.Name, version)
+	log.Success(fmt.Sprintf("Successfully released \"%s %s\"", module.Name, version))
 
-	log.Println("Completed!")
+	log.Completed()
 
 	return nil
 }

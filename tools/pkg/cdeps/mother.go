@@ -3,6 +3,7 @@ package cdeps
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/mother"
 )
@@ -12,7 +13,7 @@ type m struct {
 }
 
 func (m *m) FileValid(path string) (string, string, []byte) {
-	path += "/random"
+	path = filepath.Join(path, m.LoremIpsumWord())
 
 	err := os.MkdirAll(path, 0700)
 
@@ -20,7 +21,7 @@ func (m *m) FileValid(path string) (string, string, []byte) {
 		panic(err.Error())
 	}
 
-	file := m.LoremIpsumWord() + ".random"
+	file := m.LoremIpsumWord() + m.ID() + "." + m.FileExtension()
 
 	content := []byte(m.Message())
 
@@ -34,7 +35,7 @@ func (m *m) FileValid(path string) (string, string, []byte) {
 }
 
 func (m *m) FilesValid(path string, extensions []string) (string, []string) {
-	path += "/random"
+	path = filepath.Join(path, m.LoremIpsumWord())
 
 	err := os.MkdirAll(path, 0700)
 
@@ -45,7 +46,7 @@ func (m *m) FilesValid(path string, extensions []string) (string, []string) {
 	files := make([]string, m.RandomInt([]int{1, 10}))
 
 	for i := range len(files) {
-		files[i] = m.LoremIpsumWord() + m.RandomString(extensions)
+		files[i] = m.LoremIpsumWord() + m.ID() + m.RandomString(extensions)
 
 		err = os.WriteFile(filepath.Join(path, files[i]), []byte{}, 0600)
 
@@ -57,8 +58,22 @@ func (m *m) FilesValid(path string, extensions []string) (string, []string) {
 	return path, files
 }
 
+func (m *m) FilesFilter(filter string, files []string, path string) []string {
+	var filtered []string
+
+	isMatch := regexp.MustCompile(filter).MatchString
+
+	for _, file := range files {
+		if isMatch(file) {
+			filtered = append(filtered, filepath.Join(path, file))
+		}
+	}
+
+	return filtered
+}
+
 func (m *m) FileInvalid(path string) string {
-	return filepath.Join(path, m.LoremIpsumWord())
+	return filepath.Join(path, m.LoremIpsumWord()+"."+m.FileExtension())
 }
 
 func (m *m) DirectoryInvalid(path string) string {

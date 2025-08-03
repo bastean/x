@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
+
+	"github.com/bastean/x/tools/internal/app/cdeps"
 )
 
 type CDepsTestSuite struct {
@@ -16,8 +18,19 @@ func (s *CDepsTestSuite) SetupSuite() {
 	s.SUT = "../../../cmd/cdeps"
 }
 
+func (s *CDepsTestSuite) TestSentinel() {
+	s.Equal("cDeps", cdeps.App)
+}
+
 func (s *CDepsTestSuite) TestHelp() {
-	expected := `Usage: cdeps [flags]
+	expected := `       ________
+__________  __ \_____ ________ ________
+_  ___/__  / / /_  _ \___  __ \__  ___/
+/ /__  _  /_/ / /  __/__  /_/ /_(__  )
+\___/  /_____/  \___/ _  .___/ /____/
+                      /_/
+
+Usage: cdeps [flags]
 
   -c string
     	cDeps configuration file (required) (default "cdeps.json")
@@ -27,7 +40,7 @@ func (s *CDepsTestSuite) TestHelp() {
 
 	s.NoError(err)
 
-	s.EqualValues(expected, actual)
+	s.Equal(expected, string(actual))
 }
 
 func TestAcceptanceCDepsSuite(t *testing.T) {

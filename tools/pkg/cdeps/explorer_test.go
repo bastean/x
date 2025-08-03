@@ -14,13 +14,13 @@ import (
 
 type ExplorerTestSuite struct {
 	suite.Default
-	SUT             *cdeps.Explorer
-	directory, file string
-	extensions      []string
+	SUT                   *cdeps.Explorer
+	targetDirectory, file string
+	extensions            []string
 }
 
 func (s *ExplorerTestSuite) SetupSuite() {
-	s.directory = "ignore"
+	s.targetDirectory = "ignore"
 
 	s.file = "ignore.test"
 
@@ -31,12 +31,12 @@ func (s *ExplorerTestSuite) SetupSuite() {
 
 func (s *ExplorerTestSuite) SetupTest() {
 	_ = os.Remove(s.file)
-	_ = os.RemoveAll(s.directory)
+	_ = os.RemoveAll(s.targetDirectory)
 }
 
 func (s *ExplorerTestSuite) TestCreateDirectory() {
-	s.NoError(s.SUT.CreateDirectory(s.directory))
-	s.DirExists(s.directory)
+	s.NoError(s.SUT.CreateDirectory(s.targetDirectory))
+	s.DirExists(s.targetDirectory)
 }
 
 func (s *ExplorerTestSuite) TestCreateDirectoryErrFailedCreation() {
@@ -50,15 +50,15 @@ func (s *ExplorerTestSuite) TestCreateDirectoryErrFailedCreation() {
 }
 
 func (s *ExplorerTestSuite) TestCopyFile() {
-	path, file, expected := cdeps.Mother().FileValid(s.directory)
+	sourceDirectory, file, expected := cdeps.Mother().FileValid(s.targetDirectory)
 
-	s.NoError(s.SUT.CopyFile(file, path, s.directory))
+	s.NoError(s.SUT.CopyFile(file, sourceDirectory, s.targetDirectory))
 
-	path = filepath.Join(s.directory, file)
+	targetFile := filepath.Join(s.targetDirectory, file)
 
-	s.FileExists(path)
+	s.FileExists(targetFile)
 
-	actual, err := os.ReadFile(path) //nolint:gosec
+	actual, err := os.ReadFile(targetFile) //nolint:gosec
 
 	s.NoError(err)
 
@@ -66,69 +66,91 @@ func (s *ExplorerTestSuite) TestCopyFile() {
 }
 
 func (s *ExplorerTestSuite) TestCopyFileErrFailedReading() {
-	actual := s.SUT.CopyFile(s.file, s.directory, "./")
+	sourceDirectory := cdeps.Mother().DirectoryInvalid(s.targetDirectory)
 
-	expected := fmt.Errorf("failed to read %q from %q [%s]", s.file, s.directory, embed.Extract(actual.Error()))
+	actual := s.SUT.CopyFile(s.file, sourceDirectory, s.targetDirectory)
+
+	expected := fmt.Errorf("failed to read %q from %q [%s]", s.file, sourceDirectory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TestCopyFileErrFailedWriting() {
-	path, file, _ := cdeps.Mother().FileValid(s.directory)
+	sourceDirectory, file, _ := cdeps.Mother().FileValid(s.targetDirectory)
 
-	directory := cdeps.Mother().DirectoryInvalid(s.directory)
+	targetDirectory := cdeps.Mother().DirectoryInvalid(s.targetDirectory)
 
-	actual := s.SUT.CopyFile(file, path, directory)
+	actual := s.SUT.CopyFile(file, sourceDirectory, targetDirectory)
 
-	expected := fmt.Errorf("failed to write %q on %q [%s]", file, directory, embed.Extract(actual.Error()))
+	expected := fmt.Errorf("failed to write %q on %q [%s]", file, targetDirectory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TestCopyDependency() {
-	path, files := cdeps.Mother().FilesValid(s.directory, s.extensions)
+	sourceDirectory, files := cdeps.Mother().FilesValid(s.targetDirectory, s.extensions)
+
+	var (
+		err              error
+		expected, actual []string
+	)
 
 	for _, file := range files {
-		s.NoError(s.SUT.CopyDependency(file, path, s.directory))
+		actual, err = s.SUT.CopyDependency(file, sourceDirectory, s.targetDirectory)
+
+		s.NoError(err)
+
+		expected = []string{filepath.Join(s.targetDirectory, file)}
+
+		s.Equal(expected, actual)
 	}
 
 	for _, file := range files {
-		s.FileExists(filepath.Join(s.directory, file))
+		s.FileExists(filepath.Join(s.targetDirectory, file))
 	}
 }
 
 func (s *ExplorerTestSuite) TestCopyDependencyRegexp() {
 	const (
-		everyMinFile   = `^.+\.min\.(js|css)$`
-		everyWoff2File = `^.+\.woff2$`
+		RExEveryMinFile   = `^.+\.min\.(js|css)$`
+		RExEveryWoff2File = `^.+\.woff2$`
 	)
 
-	path, files := cdeps.Mother().FilesValid(s.directory, s.extensions)
+	regExp := cdeps.Mother().RandomString([]string{RExEveryMinFile, RExEveryWoff2File})
 
-	s.NoError(s.SUT.CopyDependency(everyMinFile, path, s.directory))
+	sourceDirectory, files := cdeps.Mother().FilesValid(s.targetDirectory, s.extensions)
 
-	s.NoError(s.SUT.CopyDependency(everyWoff2File, path, s.directory))
+	var (
+		err              error
+		expected, actual []string
+	)
 
-	for _, file := range files {
-		s.FileExists(filepath.Join(s.directory, file))
+	actual, err = s.SUT.CopyDependency(regExp, sourceDirectory, s.targetDirectory)
+
+	s.NoError(err)
+
+	expected = cdeps.Mother().FilesFilter(regExp, files, s.targetDirectory)
+
+	s.ElementsMatch(expected, actual)
+
+	for _, file := range expected {
+		s.FileExists(file)
 	}
 }
 
 func (s *ExplorerTestSuite) TestCopyDependencyErrFailed() {
-	file := s.file
+	sourceDirectory := cdeps.Mother().DirectoryInvalid(s.targetDirectory)
 
-	source := cdeps.Mother().FileInvalid(s.directory)
+	_, actual := s.SUT.CopyDependency(s.file, sourceDirectory, s.targetDirectory)
 
-	actual := s.SUT.CopyDependency(file, source, s.directory)
-
-	expected := fmt.Errorf("failed to copy %q from %q [%s]", file, source, embed.Extract(actual.Error()))
+	expected := fmt.Errorf("failed to copy %q from %q [%s]", s.file, sourceDirectory, embed.Extract(actual.Error()))
 
 	s.Equal(expected, actual)
 }
 
 func (s *ExplorerTestSuite) TearDownTest() {
 	_ = os.Remove(s.file)
-	_ = os.RemoveAll(s.directory)
+	_ = os.RemoveAll(s.targetDirectory)
 }
 
 func TestIntegrationExplorerSuite(t *testing.T) {

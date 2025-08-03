@@ -493,6 +493,26 @@ tasks:
         vars:
           RUN: test
 
+  test-loop-*/*:
+    vars:
+      TOTAL: "{{index .MATCH 0}}"
+      ITERATE: "{{.TOTAL | int | until}}"
+      RUN: "{{index .MATCH 1}}"
+    cmds:
+      - for: { var: ITERATE }
+        cmd: echo "Iteration \"{{trimAll "[]" .ITEM | add1}}/{{.TOTAL}}\"" && {{.RUN}}
+
+  test-log-*/*/*:
+    requires:
+      vars: ["MODULE", "CMD", "FLAG"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      CMD: "{{index .MATCH 1}}"
+      FLAG: "{{index .MATCH 2}}"
+    cmds:
+      - mkdir -p {{.MODULE}}/test/ignore/{{.CMD}}
+      - go run ./{{.MODULE}}/cmd/{{.CMD}} {{.FLAG}} |& tee {{.MODULE}}/test/ignore/{{.CMD}}/{{.FLAG}}.log
+
   # ---------------------------------------------------------------------------- #
   #                                     Build                                    #
   # ---------------------------------------------------------------------------- #

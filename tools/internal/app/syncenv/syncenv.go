@@ -4,17 +4,18 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/bastean/x/tools/internal/pkg/cli"
 	"github.com/bastean/x/tools/internal/pkg/errs"
+	"github.com/bastean/x/tools/internal/pkg/log"
 	"github.com/bastean/x/tools/pkg/syncenv"
 )
 
 const (
+	App     = "syncENV"
 	EnvFile = ".env"
 )
 
@@ -28,7 +29,7 @@ func Init() error {
 	flag.StringVar(&envsDir, "e", "", "Path to \".env\" files directory (required)")
 
 	flag.Usage = func() {
-		cli.Usage("syncenv")
+		cli.Usage(App)
 	}
 
 	flag.Parse()
@@ -51,7 +52,9 @@ func Up() error {
 		return err
 	}
 
-	log.Println("Starting...")
+	log.Logo(App)
+
+	log.Starting()
 
 	env := new(syncenv.Env)
 
@@ -61,7 +64,7 @@ func Up() error {
 		return err
 	}
 
-	log.Printf("Template: %q", templateFile)
+	log.Info(fmt.Sprintf("Template: %q", templateFile))
 
 	files, err := os.ReadDir(envsDir)
 
@@ -100,10 +103,10 @@ func Up() error {
 			return errors.Join(err, backup.Restore(filePath))
 		}
 
-		log.Printf("Synchronized: %q", filePath)
+		log.Success(fmt.Sprintf("Synchronized: %q", filePath))
 	}
 
-	log.Println("Completed!")
+	log.Completed()
 
 	return nil
 }

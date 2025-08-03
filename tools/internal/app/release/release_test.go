@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/bastean/codexgo/v4/pkg/context/shared/domain/services/suite"
+
+	"github.com/bastean/x/tools/internal/app/release"
 )
 
 type ReleaseTestSuite struct {
@@ -16,8 +18,18 @@ func (s *ReleaseTestSuite) SetupSuite() {
 	s.SUT = "../../../cmd/release"
 }
 
+func (s *ReleaseTestSuite) TestSentinel() {
+	s.Equal("Release", release.App)
+}
+
 func (s *ReleaseTestSuite) TestHelp() {
-	expected := `Usage: release [flags]
+	expected := `________       ______
+___  __ \_____ ___  /_____ ______ ______________
+__  /_/ /_  _ \__  / _  _ \_  __ ` + "`" + `/__  ___/_  _ \
+_  _, _/ /  __/_  /  /  __// /_/ / _(__  ) /  __/
+/_/ |_|  \___/ /_/   \___/ \__,_/  /____/  \___/
+
+Usage: release [flags]
 
   -f	First Release (default: false)
   -i string
@@ -30,7 +42,7 @@ func (s *ReleaseTestSuite) TestHelp() {
 
 	s.NoError(err)
 
-	s.EqualValues(expected, actual)
+	s.Equal(expected, string(actual))
 }
 
 func TestAcceptanceReleaseSuite(t *testing.T) {

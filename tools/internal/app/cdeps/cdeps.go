@@ -5,12 +5,16 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/bastean/x/tools/internal/pkg/cli"
 	"github.com/bastean/x/tools/internal/pkg/errs"
+	"github.com/bastean/x/tools/internal/pkg/log"
 	"github.com/bastean/x/tools/pkg/cdeps"
+)
+
+const (
+	App = "cDeps"
 )
 
 var (
@@ -31,7 +35,7 @@ func Init() error {
 	flag.StringVar(&configFile, "c", "cdeps.json", "cDeps configuration file (required)")
 
 	flag.Usage = func() {
-		cli.Usage("cdeps")
+		cli.Usage(App)
 	}
 
 	flag.Parse()
@@ -54,7 +58,9 @@ func Up() error {
 		return err
 	}
 
-	log.Println("Starting...")
+	log.Logo(App)
+
+	log.Starting()
 
 	config := new(Configuration)
 
@@ -85,6 +91,10 @@ func Up() error {
 
 	explorer := new(cdeps.Explorer)
 
+	var (
+		list, copies []string
+	)
+
 	for _, dependency := range config.Dependencies {
 		for i, file := range dependency.Files {
 			if HasWildcard(file) {
@@ -108,13 +118,19 @@ func Up() error {
 		}
 
 		for _, file := range dependency.Files {
-			if err = explorer.CopyDependency(file, dependency.Source, dependency.Target); err != nil {
+			list, err = explorer.CopyDependency(file, dependency.Source, dependency.Target)
+
+			if err != nil {
 				return err
 			}
+
+			copies = append(copies, list...)
 		}
 	}
 
-	log.Println("Completed!")
+	log.Created(copies...)
+
+	log.Completed()
 
 	return nil
 }
