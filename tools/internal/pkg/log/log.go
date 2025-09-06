@@ -25,11 +25,11 @@ func Logo(name string) {
 }
 
 func Error(what string) {
-	Log.Error("Error: " + what)
+	Log.Error("Error: %s", what)
 }
 
 func Fatal(what string) {
-	Log.Fatal("Error: " + what)
+	Log.Fatal("Error: %s", what)
 }
 
 func Starting() {
