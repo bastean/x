@@ -19,36 +19,13 @@ vars:
 
   # ---------------------------------- Prompt ---------------------------------- #
 
-  PROMPT_WARNING: This is a dangerous command... Do you want to continue?
+  PROMPT_CONFIRMATION: Do you want to continue?
+  PROMPT_WARNING: This is a dangerous command... {{.PROMPT_CONFIRMATION}}
 
 tasks:
   # ---------------------------------------------------------------------------- #
   #                                      Bin                                     #
   # ---------------------------------------------------------------------------- #
-
-  bashrc:
-    internal: true
-    requires:
-      vars: ["CONFIG"]
-    cmds:
-      - echo -e "{{.CONFIG}}" >> ~/.bashrc
-      - . ~/.bashrc
-
-  module: &module
-    dir: "{{if .MODULE}}{{.MODULE}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
-
-  bash:
-    <<: *module
-    internal: true
-    requires:
-      vars: ["RUN"]
-    cmd: bash -o pipefail -c '{{.RUN}}'
-
-  curl:
-    internal: true
-    requires:
-      vars: ["URL", "PIPE"]
-    cmd: curl -sSfL {{.URL}} | {{.PIPE}}
 
   prompt-*:
     internal: true
@@ -59,19 +36,27 @@ tasks:
       PROMPT: "{{index .MATCH 0}}"
     cmd: echo {{.PROMPT}}
 
+  curl:
+    internal: true
+    requires:
+      vars: ["URL", "PIPE"]
+    cmd: curl -sSfL {{.URL}} | {{.PIPE}}
+
   replace:
     internal: true
     requires:
       vars: ["OLD", "NEW", "FILE"]
     cmd: sed -i -E 's/{{.OLD}}/{{.NEW}}/g' {{.FILE}}
 
-  go-install:
+  module: &module
+    dir: "{{if .MODULE}}{{.MODULE}}{{else}}{{.USER_WORKING_DIR}}{{end}}"
+
+  bash:
+    <<: *module
     internal: true
     requires:
-      vars: ["PACKAGES"]
-    cmds:
-      - for: { var: PACKAGES, as: PACKAGE }
-        cmd: go install {{.PACKAGE}}
+      vars: ["RUN"]
+    cmd: bash -o pipefail -c '{{.RUN}}'
 
   go-module:
     internal: true
@@ -100,49 +85,13 @@ tasks:
     internal: true
     cmd: go work sync
 
-  bun-ci:
-    internal: true
-    cmd: bun i --frozen-lockfile
-
-  prettier-*:
-    internal: true
-    requires:
-      vars: ["ACTION"]
-    vars:
-      ACTION: "{{index .MATCH 0}}"
-    cmd: bunx prettier --no-config --ignore-unknown --{{.ACTION}} .
+  # ---------------------------------------------------------------------------- #
+  #                                    Upgrade                                   #
+  # ---------------------------------------------------------------------------- #
 
   ncu:
     internal: true
     cmd: bunx ncu -ws -u {{.FILTERS}}
-
-  release-it:
-    internal: true
-    cmd: bunx release-it -V {{.OPTIONS}}
-
-  release-it-dry:
-    internal: true
-    cmd: bunx release-it -V -d --no-git.requireCleanWorkingDir {{.OPTIONS}}
-
-  trufflehog-git:
-    internal: true
-    requires:
-      vars: ["URI"]
-    cmd: sudo trufflehog git {{.URI}} --only-verified
-
-  trivy-repo:
-    internal: true
-    requires:
-      vars: ["SCANNERS"]
-    cmd: trivy repo --skip-dirs vendor --skip-dirs node_modules --skip-dirs dist --exit-code 1 --scanners {{.SCANNERS}}
-
-  git-reset-hard:
-    internal: true
-    cmd: git reset --hard HEAD
-
-  # ---------------------------------------------------------------------------- #
-  #                                    Upgrade                                   #
-  # ---------------------------------------------------------------------------- #
 
   upgrade-managers:
     cmds:
@@ -189,14 +138,17 @@ tasks:
           NEW: 'options: \[{{.MODULES}}\]'
           FILE: ./.github/workflows/release.yml
 
-  upgrade-reset:
-    cmds:
-      - task: git-reset-hard
-      - task: bun-ci
-
   # ---------------------------------------------------------------------------- #
   #                                    Install                                   #
   # ---------------------------------------------------------------------------- #
+
+  go-install:
+    internal: true
+    requires:
+      vars: ["PACKAGES"]
+    cmds:
+      - for: { var: PACKAGES, as: PACKAGE }
+        cmd: go install {{.PACKAGE}}
 
   install-scanners:
     cmds:
@@ -258,7 +210,7 @@ tasks:
     cmds:
       - go mod download
       - task: work-sync
-      - task: bun-ci
+      - bun i --frozen-lockfile
 
   # ---------------------------------------------------------------------------- #
   #                                    Restore                                   #
@@ -296,6 +248,18 @@ tasks:
   # ---------------------------------------------------------------------------- #
   #                                     Scan                                     #
   # ---------------------------------------------------------------------------- #
+
+  trufflehog-git:
+    internal: true
+    requires:
+      vars: ["URI"]
+    cmd: sudo trufflehog git {{.URI}} --only-verified
+
+  trivy-repo:
+    internal: true
+    requires:
+      vars: ["SCANNERS"]
+    cmd: trivy repo --skip-dirs vendor --skip-dirs node_modules --skip-dirs dist --exit-code 1 --scanners {{.SCANNERS}}
 
   scan-secrets-local:
     cmds:
@@ -350,6 +314,14 @@ tasks:
   # ---------------------------------------------------------------------------- #
   #                                  Lint/Format                                 #
   # ---------------------------------------------------------------------------- #
+
+  prettier-*:
+    internal: true
+    requires:
+      vars: ["ACTION"]
+    vars:
+      ACTION: "{{index .MATCH 0}}"
+    cmd: bunx prettier --no-config --ignore-unknown --{{.ACTION}} .
 
   lint:
     <<: *module
@@ -493,26 +465,6 @@ tasks:
         vars:
           RUN: test
 
-  test-loop-*/*:
-    vars:
-      TOTAL: "{{index .MATCH 0}}"
-      ITERATE: "{{.TOTAL | int | until}}"
-      RUN: "{{index .MATCH 1}}"
-    cmds:
-      - for: { var: ITERATE }
-        cmd: echo "Iteration \"{{trimAll "[]" .ITEM | add1}}/{{.TOTAL}}\"" && {{.RUN}}
-
-  test-log-*/*/*:
-    requires:
-      vars: ["MODULE", "CMD", "FLAG"]
-    vars:
-      MODULE: "{{index .MATCH 0}}"
-      CMD: "{{index .MATCH 1}}"
-      FLAG: "{{index .MATCH 2}}"
-    cmds:
-      - mkdir -p {{.MODULE}}/test/ignore/{{.CMD}}
-      - go run ./{{.MODULE}}/cmd/{{.CMD}} {{.FLAG}} |& tee {{.MODULE}}/test/ignore/{{.CMD}}/{{.FLAG}}.log
-
   # ---------------------------------------------------------------------------- #
   #                                     Build                                    #
   # ---------------------------------------------------------------------------- #
@@ -533,6 +485,14 @@ tasks:
   # ---------------------------------------------------------------------------- #
   #                                    Release                                   #
   # ---------------------------------------------------------------------------- #
+
+  release-it:
+    internal: true
+    cmd: bunx release-it -V {{.OPTIONS}}
+
+  release-it-dry:
+    internal: true
+    cmd: bunx release-it -V -d --no-git.requireCleanWorkingDir {{.OPTIONS}}
 
   release:
     cmds:
@@ -594,7 +554,7 @@ tasks:
       - task: work-sync
 
   work-drop-*:
-    prompt: "{{.PROMPT_WARNING}}"
+    prompt: "{{.PROMPT_CONFIRMATION}}"
     requires:
       vars: ["MODULE"]
     vars:
@@ -696,7 +656,7 @@ tasks:
     prompt: "{{.PROMPT_WARNING}}"
     cmds:
       - git clean -e .env* -fdx
-      - task: git-reset-hard
+      - git reset --hard HEAD
       - task: init
 
   # ---------------------------------------------------------------------------- #
@@ -704,6 +664,30 @@ tasks:
   # ---------------------------------------------------------------------------- #
 
   mailpit: mailpit --smtp-auth-allow-insecure --smtp-auth-accept-any
+
+  # ---------------------------------------------------------------------------- #
+  #                                     Util                                     #
+  # ---------------------------------------------------------------------------- #
+
+  loop-*/*:
+    vars:
+      TOTAL: "{{index .MATCH 0}}"
+      ITERATE: "{{.TOTAL | int | until}}"
+      RUN: "{{index .MATCH 1}}"
+    cmds:
+      - for: { var: ITERATE }
+        cmd: echo "Iteration \"{{trimAll "[]" .ITEM | add1}}/{{.TOTAL}}\" - {{.RUN}}" && {{.RUN}}
+
+  log-*/*/*:
+    requires:
+      vars: ["MODULE", "CMD", "FLAG"]
+    vars:
+      MODULE: "{{index .MATCH 0}}"
+      CMD: "{{index .MATCH 1}}"
+      FLAG: "{{index .MATCH 2}}"
+    cmds:
+      - mkdir -p {{.MODULE}}/ignore/{{.CMD}}
+      - go run ./{{.MODULE}}/cmd/{{.CMD}} {{.FLAG}} |& tee {{.MODULE}}/ignore/{{.CMD}}/{{.FLAG}}.log
 
   # ---------------------------------------------------------------------------- #
   #                                      Fix                                     #
