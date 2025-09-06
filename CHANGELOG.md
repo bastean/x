@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0](https://github.com/bastean/x/compare/v0.8.0...v0.9.0) (2025-09-06)
+
+### Chores
+
+- **deps:** upgrade ([d19a853](https://github.com/bastean/x/commit/d19a853d442c49798b5a9aefd16b80229afc847a))
+- **release:** tools/v0.4.1 ([42e425c](https://github.com/bastean/x/commit/42e425c8b7ff48b1a3ce6e430b07f7872450d61e))
+- **task:** reorder tasks ([e9842ee](https://github.com/bastean/x/commit/e9842eeeeae2ffccbe42c04e841e3dac81bf79f9))
+- **vscode:** update snippets ([cc751ec](https://github.com/bastean/x/commit/cc751ecafcb4c411969885db5aba71fe056f367b))
+
+### Refactors
+
+- **tools:** update log formatting ([f2e9533](https://github.com/bastean/x/commit/f2e95330a1655c6d2c5a0f260d6164a1e31ee053))
+
 ## [0.8.0](https://github.com/bastean/x/compare/v0.7.0...v0.8.0) (2025-08-03)
 
 ### Chores
