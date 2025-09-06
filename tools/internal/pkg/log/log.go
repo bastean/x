@@ -1,8 +1,6 @@
 package log
 
 import (
-	"fmt"
-
 	"github.com/common-nighthawk/go-figure"
 
 	"github.com/bastean/codexgo/v4/pkg/context/shared/infrastructure/records/log"
@@ -38,7 +36,7 @@ func Starting() {
 
 func Created(values ...string) {
 	for _, value := range values {
-		Success(fmt.Sprintf("Created: %q", value))
+		Success("Created: %q", value)
 	}
 }
 

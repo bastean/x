@@ -64,7 +64,7 @@ func Up() error {
 		return err
 	}
 
-	log.Info(fmt.Sprintf("Template: %q", templateFile))
+	log.Info("Template: %q", templateFile)
 
 	files, err := os.ReadDir(envsDir)
 
@@ -103,7 +103,7 @@ func Up() error {
 			return errors.Join(err, backup.Restore(filePath))
 		}
 
-		log.Success(fmt.Sprintf("Synchronized: %q", filePath))
+		log.Success("Synchronized: %q", filePath)
 	}
 
 	log.Completed()

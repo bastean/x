@@ -106,7 +106,7 @@ func Up() error {
 		return err
 	}
 
-	log.Success(fmt.Sprintf("Successfully released \"%s %s\"", module.Name, version))
+	log.Success("Successfully released \"%s %s\"", module.Name, version)
 
 	log.Completed()
 
