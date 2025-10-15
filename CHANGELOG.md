@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/bastean/x/compare/v0.10.0...v0.11.0) (2025-10-15)
+
+### Chores
+
+- **deps:** upgrade ([34da763](https://github.com/bastean/x/commit/34da7631c40736598f8684ee103ade249ff6b4ce))
+- **release:** tools/v0.4.3 ([79df41d](https://github.com/bastean/x/commit/79df41d2e1c867b981d3f8a02105c4af55696ddd))
+
 ## [0.10.0](https://github.com/bastean/x/compare/v0.9.0...v0.10.0) (2025-09-21)
 
 ### Chores
