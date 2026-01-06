@@ -15,15 +15,15 @@
   },
   "workspaces": [],
   "devDependencies": {
-    "@commitlint/cli": "20.1.0",
-    "@commitlint/config-conventional": "20.0.0",
+    "@commitlint/cli": "20.3.0",
+    "@commitlint/config-conventional": "20.3.0",
     "@release-it/bumper": "7.0.5",
-    "@release-it/conventional-changelog": "10.0.1",
+    "@release-it/conventional-changelog": "10.0.4",
     "husky": "9.1.7",
-    "lint-staged": "16.2.4",
-    "npm-check-updates": "19.1.0",
-    "prettier": "3.6.2",
-    "release-it": "19.0.5"
+    "lint-staged": "16.2.7",
+    "npm-check-updates": "19.3.1",
+    "prettier": "3.7.4",
+    "release-it": "19.2.3"
   },
   "overrides": {
     "conventional-changelog-conventionalcommits": "8.0.0"

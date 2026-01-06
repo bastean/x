@@ -31,31 +31,31 @@ func (e *Env) Sync(envs []string, file string) error {
 		envs = envs[:len(envs)-1]
 	}
 
-	var syncEnvs string
+	var syncEnvs strings.Builder
 	var isNotUpdated bool
 
 	for _, env := range envs {
 		isNotUpdated = true
 
 		if env == "" {
-			syncEnvs += "\n"
+			syncEnvs.WriteString("\n")
 			continue
 		}
 
 		for _, fileEnv := range fileEnvs {
 			if strings.Contains(fileEnv, env) {
-				syncEnvs += fileEnv + "\n"
+				syncEnvs.WriteString(fileEnv + "\n")
 				isNotUpdated = false
 				break
 			}
 		}
 
 		if isNotUpdated {
-			syncEnvs += env + "\n"
+			syncEnvs.WriteString(env + "\n")
 		}
 	}
 
-	err = os.WriteFile(file, []byte(syncEnvs), 0600)
+	err = os.WriteFile(file, []byte(syncEnvs.String()), 0600)
 
 	if err != nil {
 		return fmt.Errorf("failure to overwrite %q [%s]", file, err)
